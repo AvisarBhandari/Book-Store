@@ -6,11 +6,14 @@ import { connectDB } from "./config/db.js";
 dotenv.config();
 
 const app = express();
-const port = 5001;
+const port = process.env.PORT || 5000;
 
 connectDB();
 
 app.use("/api/book", bookRoutes);
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+
+connectDB().then(() => {
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
 });
