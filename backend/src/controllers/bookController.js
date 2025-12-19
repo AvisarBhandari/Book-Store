@@ -9,14 +9,7 @@ export async function getAllBooks(req, res) {
   }
 }
 
-export async function bestSellerBooks(req, res) {
-  try {
-    const books = await Book.find().sort({ soldCount: -1 }).limit(10);
-    res.status(200).json(books);
-  } catch (error) {
-    res.status(500).json({ message: "Server Error", error: error.message });
-  }
-}
+
 export async function createBook(req, res) {
   res.status(200).send("This is a book is created");
 }
