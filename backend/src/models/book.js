@@ -52,15 +52,17 @@ bookSchema.index({ createdAt: -1 });
 // Seller dashboard (future)
 bookSchema.index({ seller: 1 });
 
-// Status + sorting 
+// Status + sorting
 bookSchema.index({ status: 1, soldCount: -1 });
 bookSchema.index({ status: 1, discountPercentage: -1 });
 bookSchema.index({ status: 1, createdAt: -1 });
 
-
 bookSchema.pre("save", function (next) {
-  this.finalPrice = this.price - (this.price * this.discountPercentage) / 100;
-  next();
+  try {
+    this.finalPrice = this.price - (this.price * this.discountPercentage) / 100;
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 const Book = mongoose.model("Book", bookSchema);
