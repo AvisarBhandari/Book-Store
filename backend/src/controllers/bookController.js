@@ -1,6 +1,6 @@
 import Book from "../models/book.js";
 import fs from "fs";
-import path from "path";
+// import path from "path";
 
 export async function getAllBooks(req, res) {
   try {
