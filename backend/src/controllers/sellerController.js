@@ -51,3 +51,43 @@ export const createSeller = async (req, res) => {
     });
   }
 };
+
+export const loginSeller = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password required" });
+    }
+
+    const seller = await Seller.findOne({ email });
+    if (!seller) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const isMatch = await seller.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const token = seller.generateToken();
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      seller: {
+        id: seller._id,
+        name: seller.name,
+        email: seller.email,
+        storeName: seller.storeName,
+        businessType: seller.businessType,
+        ppImage: seller.ppImage,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
