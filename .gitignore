@@ -15,12 +15,13 @@ book cover
 
 test.html
 .env
-!books/.gitkeep
-!covers/.gitkeep
-!admin/.gitkeep
-!seller/.gitkeep
-!user/.gitkeep
-user/*
+books
+covers/
+admin/
+seller/
+user/
+
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
