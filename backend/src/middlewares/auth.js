@@ -1,28 +1,46 @@
 import jwt from "jsonwebtoken";
+import Admin from "../models/admin.js";
 import Seller from "../models/seller.js";
+import User from "../models/user.js";
 
-const authSeller = async (req, res, next) => {
+export const protect = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    const token = req.cookies.token;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "No token provided" });
+    if (!token) {
+      return res.status(401).json({ message: "Not authenticated" });
     }
-
-    const token = authHeader.split(" ")[1];
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const seller = await Seller.findById(decoded.id).select("-password");
-    if (!seller) {
+    let account;
+
+    if (decoded.role === "admin") {
+      account = await Admin.findById(decoded.id).select("-password");
+    } else if (decoded.role === "seller") {
+      account = await Seller.findById(decoded.id).select("-password");
+    } else if (decoded.role === "user") {
+      account = await User.findById(decoded.id).select("-password");
+    }
+
+    if (!account) {
       return res.status(401).json({ message: "Invalid token" });
     }
 
-    req.seller = seller;
+    req.user = account;
+    req.role = decoded.role;
+
     next();
   } catch (error) {
-    res.status(401).json({ message: "Unauthorized", error: error.message });
+    res.status(401).json({ message: "Unauthorized" });
   }
 };
+export const allowRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.role)) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    next();
+  };
+};
 
-export default authSeller;

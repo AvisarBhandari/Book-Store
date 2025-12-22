@@ -2,13 +2,13 @@ import express from "express";
 import dotenv from "dotenv";
 import path from "path";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import { connectDB } from "./config/db.js";
 import bookRoutes from "./routes/bookRoutes.js";
 import sellerRoutes from "./routes/sellerRoutes.js";
-import adminRoutes from './routes/adminRoutes.js'
+import adminRoutes from "./routes/adminRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import rateLimiter from "./middlewares/rateLimiter.js";
-import authSeller from "./middlewares/auth.js";
 
 dotenv.config();
 const app = express();
@@ -22,10 +22,12 @@ app.use((req, res, next) => {
   console.log("Request method:", req.method, "req path:", req.path);
   next();
 });
-
-app.get("/profile", authSeller, (req, res) => {
-  res.json(req.seller);
-});
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 
 app.use("/uploads", express.static(path.join(path.resolve(), "uploads")));
 

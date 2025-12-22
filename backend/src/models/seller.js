@@ -15,6 +15,7 @@ const sellerSchema = new mongoose.Schema(
     },
     ppImage: String,
     role: { type: String, default: "seller" },
+    bookList: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
   },
   { timestamps: true }
 );
@@ -43,7 +44,6 @@ sellerSchema.methods.generateToken = function () {
     { expiresIn: process.env.JWT_EXPIRES_IN }
   );
 };
-
 
 const Seller = mongoose.model("Seller", sellerSchema);
 export default Seller;
