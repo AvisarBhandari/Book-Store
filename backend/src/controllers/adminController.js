@@ -1,8 +1,8 @@
-import admin from "../models/admin.js";
+import Admin from "../models/admin.js";
 
 export async function getAlladmin(req, res) {
   try {
-    const admins = await admin.find();
+    const admins = await Admin.find();
     res.status(200).json(admins);
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
@@ -17,14 +17,14 @@ export const createadmin = async (req, res) => {
       return res.status(400).json({ message: "Required fields missing" });
     }
 
-    const existingadmin = await admin.findOne({ email });
+    const existingadmin = await Admin.findOne({ email });
     if (existingadmin) {
       return res.status(409).json({ message: "admin already exists" });
     }
 
     const ppImage = req.file ? req.file.path : null;
 
-    const newadmin = await admin.create({
+    const newadmin = await Admin.create({
       name,
       email,
       password,
@@ -56,32 +56,30 @@ export const loginadmin = async (req, res) => {
       return res.status(400).json({ message: "Email and password required" });
     }
 
-    const foundAdmin = await admin.findOne({ email });
-    if (!foundAdmin) {
+    const admin = await Admin.findOne({ email });
+    if (!admin) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const isMatch = await foundAdmin.comparePassword(password);
+    const isMatch = await admin.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = foundAdmin.generateToken();
+    const token = admin.generateToken();
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     res.status(200).json({
       message: "Login successful",
-      token,
-      admin: {
-        id: foundAdmin._id,
-        name: foundAdmin.name,
-        email: foundAdmin.email,
-        ppImage: foundAdmin.ppImage,
-      },
+      role: "admin",
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
