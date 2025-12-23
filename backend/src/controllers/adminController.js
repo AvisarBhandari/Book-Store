@@ -9,6 +9,35 @@ export async function getAlladmin(req, res) {
   }
 }
 
+export const getAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: "Admin ID is required" });
+    }
+
+    const admin = await Admin.findById(id).select(
+      "name email ppImage createdAt updatedAt"
+    );
+
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      admin,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
 export const createadmin = async (req, res) => {
   try {
     const { name, email, password } = req.body;

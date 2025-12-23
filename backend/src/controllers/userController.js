@@ -1,4 +1,5 @@
 import User from "../models/user.js";
+import mongoose from "mongoose";
 
 export async function getAlluser(req, res) {
   try {
@@ -8,18 +9,34 @@ export async function getAlluser(req, res) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 }
+
 export const getUser = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { identifier } = req.params;
 
-    if (!id) {
-      return res.status(400).json({ message: "User ID is required" });
+    if (!identifier) {
+      return res.status(400).json({
+        success: false,
+        message: "user id or name is required",
+      });
     }
 
-    const user = await User.findById(id).select("name ppImage");
+    let user;
+    // If valid MongoDB ObjectId → search by _id
+    if (mongoose.Types.ObjectId.isValid(identifier)) {
+      user = await User.findById(identifier);
+    } else {
+      // Case-insensitive name search
+      user = await User.findOne({
+        name: { $regex: `^${identifier}$`, $options: "i" },
+      });
+    }
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
     res.status(200).json({
@@ -34,6 +51,7 @@ export const getUser = async (req, res) => {
     });
   }
 };
+
 export const createuser = async (req, res) => {
   try {
     const { name, email, password } = req.body;

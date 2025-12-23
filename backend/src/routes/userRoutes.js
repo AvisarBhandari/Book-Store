@@ -26,8 +26,8 @@ router.post("/logout", (req, res) => {
   res.status(200).json({ message: "Logged out successfully" });
 });
 
-router.get("/", getAlluser);
-router.get("/:id", getUser);
+router.get("/", protect, allowRoles("admin"), getAlluser);
+router.get("/:identifier", getUser);
 router.post("/create", upload.single("ppuser"), createuser);
 router.post("/login", loginuser);
 
