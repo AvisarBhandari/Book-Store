@@ -17,14 +17,21 @@ export const createBook = async (req, res) => {
     console.log("Files received:", req.files);
     console.log("Body received:", req.body);
 
-    const { title, author, description, price, discountPercentage, genres } =
-      req.body;
+    const {
+      title,
+      author,
+      description,
+      price,
+      discountPercentage,
+      genres,
+      seller,
+    } = req.body;
 
     // Validate required fields
-    if (!title || !author || !description || !price) {
+    if (!title || !author || !description || !price || !seller) {
       return res.status(400).json({
         success: false,
-        message: "Title, author, description, and price are required",
+        message: "Title, author, description, price, and seller are required",
       });
     }
 
@@ -50,6 +57,7 @@ export const createBook = async (req, res) => {
       price: Number(price),
       discountPercentage: discountPercentage ? Number(discountPercentage) : 0,
       genres: genres ? genres.split(",") : [],
+      seller,
       coverImage: req.files.coverImage[0].path,
       bookFile: req.files.bookFile[0].path,
     });
@@ -72,8 +80,15 @@ export const createBook = async (req, res) => {
 export const updateBook = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, author, description, price, discountPercentage, genres } =
-      req.body;
+    const {
+      title,
+      author,
+      description,
+      price,
+      discountPercentage,
+      genres,
+      seller,
+    } = req.body;
 
     const book = await Book.findById(id);
     if (!book) {
@@ -90,6 +105,7 @@ export const updateBook = async (req, res) => {
     if (discountPercentage)
       book.discountPercentage = Number(discountPercentage);
     if (genres) book.genres = genres.split(",");
+    if (seller) book.seller = seller;
 
     // Delete previous files if new ones are uploaded
     if (req.files) {
@@ -121,7 +137,6 @@ export const updateBook = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-
 
 export const deleteBook = async (req, res) => {
   try {
@@ -156,4 +171,3 @@ export const deleteBook = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-

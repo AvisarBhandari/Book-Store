@@ -20,7 +20,8 @@ covers/
 admin/
 seller/
 user/
-
+seed/
+utils/
 
 # Editor directories and files
 .vscode/*
