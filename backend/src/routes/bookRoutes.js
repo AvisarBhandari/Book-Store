@@ -9,7 +9,12 @@ import {
 import filterBooks from "../controllers/filter.js";
 
 const router = express.Router();
-
+//TODO: get books by seller, user purchase history
+//TODO: reviews and ratings
+//TODO: search functionality, implement algorithms
+//TODO: recommendations based on user behavior
+//TODO: total book,sold,revenue for sellers
+//TODO: update book details
 router.get("/", getAllBooks);
 
 // Filter

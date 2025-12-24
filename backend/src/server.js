@@ -14,7 +14,7 @@ import categorieRoutes from './routes/categorieRoutes.js'
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 5000;
-
+//TODO: add reporting , analytics , reviews ,recommendations,serch functionality,
 // middlewares
 app.use(cookieParser());
 app.use(express.json());

@@ -7,9 +7,20 @@ import {
   loginadmin,
 } from "../controllers/adminController.js";
 import { protect, allowRoles } from "../middlewares/auth.js";
-
+// TODO: admin history, stats,
 const router = express.Router();
+/**
+ * ! For Testing Purposes Only
+ **/
+// TODO: Total Book,Salles,Total user,revenue stats 
+// TODO: Download Reports (7day,30day,alltime)
+// TODO: new VS returning users
+// TODO: active users
+// TODO: Total Sellers,Total order,new Customers,avrg order value (RS) 
+// TODO: reset password
+
 router.get("/", protect, allowRoles("admin"), getAlladmin);
+
 router.get("/:id", protect, allowRoles("admin"), getAdmin);
 router.get("/profile", protect, allowRoles("admin"), (req, res) => {
   res.json({

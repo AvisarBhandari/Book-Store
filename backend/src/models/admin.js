@@ -25,8 +25,9 @@ adminSchema.pre("save", async function (next) {
 adminSchema.methods.comparePassword = function (enteredPassword) {
   return bcrypt.compare(enteredPassword, this.password);
 };
-
-// generate JWT
+/**
+ * ! generate JWT
+ */
 adminSchema.methods.generateToken = function () {
   return jwt.sign(
     {

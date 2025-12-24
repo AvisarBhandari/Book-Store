@@ -8,8 +8,10 @@ import {
 import { protect, allowRoles } from "../middlewares/auth.js";
 
 const router = express.Router();
-
-// protected seller profile
+//TODO: seller history,stats,get books by seller, Today sales, total sales
+// TODO: update seller profile pic,name,password
+// TODO: delete seller account
+// TODO: sales over time 
 router.get("/profile", protect, allowRoles("seller"), (req, res) => {
   res.json({
     role: req.role,

@@ -4,12 +4,13 @@ import {
   getUser,
   createuser,
   loginuser,
+  updateUser,
 } from "../controllers/userController.js";
 import upload from "../middlewares/ppUpload.js";
 import { protect, allowRoles } from "../middlewares/auth.js";
 
 const router = express.Router();
-
+//TODO: user history, updates
 router.get("/profile", protect, allowRoles("user"), (req, res) => {
   res.json({
     role: req.role,
@@ -28,6 +29,13 @@ router.post("/logout", (req, res) => {
 
 router.get("/", protect, allowRoles("admin"), getAlluser);
 router.get("/:identifier", getUser);
+router.put(
+  "/update/:id",
+  protect,
+  allowRoles("user"),
+  upload.single("ppuser"),
+  updateUser
+);
 router.post("/create", upload.single("ppuser"), createuser);
 router.post("/login", loginuser);
 
