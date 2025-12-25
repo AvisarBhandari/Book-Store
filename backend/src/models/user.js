@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema(
     ppImage: String,
     role: { type: String, default: "user" },
     bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
+    purchasedBooks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
   },
   { timestamps: true }
 );
