@@ -28,6 +28,10 @@ const bookSchema = new mongoose.Schema(
       enum: ["pending", "approved", "rejected"],
       default: "approved",
     },
+    reatings: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

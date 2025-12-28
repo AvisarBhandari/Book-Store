@@ -1,3 +1,4 @@
+import Book from "../models/Book.js";
 import Seller from "../models/seller.js";
 
 export async function getAllSeller(req, res) {
@@ -87,3 +88,34 @@ export const loginSeller = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+export async function updateSeller(req, res) {
+  try {
+    const sellerId = req.user._id;
+    const updates = req.body;
+    const updatedSeller = await Seller.findByIdAndUpdate(sellerId, updates, {
+      new: true,
+    });
+    res.status(200).json({
+      message: "Seller updated successfully",
+      seller: updatedSeller,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+}
+export async function deleteSeller(req, res) {
+  try {
+    const SellerId = req.user._id;
+    if (!await Book.findOne({ seller: SellerId })) {
+      return res.status(404).json({ message: "Seller not found" });
+    } else {
+      await Seller.findByIdAndDelete(SellerId);
+      res.status(200).json({ message: "Seller deleted successfully" });
+      if(Seller.ppImage && fs.existsSync(Seller.ppImage)){
+        fs.unlinkSync(Seller.ppImage);
+      }
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+}
