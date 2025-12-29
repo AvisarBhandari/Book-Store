@@ -10,9 +10,14 @@ import { protect, allowRoles } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-router.post("/buy", protect, allowRoles("user"), buyBook);
-router.get("/user/orders", protect, allowRoles("user"), getUserOrders);
-router.get("/seller/orders", protect, allowRoles("seller"), getSellerOrders);
+router.post("/buy", protect, allowRoles("user", "admin"), buyBook);
+router.get("/user/orders", protect, allowRoles("user", "admin"), getUserOrders);
+router.get(
+  "/seller/orders",
+  protect,
+  allowRoles("seller", "admin"),
+  getSellerOrders
+);
 router.get(
   "/:id",
   protect,

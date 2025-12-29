@@ -1,4 +1,4 @@
-import Book from "../models/Book.js";
+import Book from "../models/book.js";
 import fs from "fs";
 import { similarityScore } from "../algorithem/fuzzySearch.js";
 // import path from "path";

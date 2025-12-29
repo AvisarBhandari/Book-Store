@@ -19,9 +19,13 @@ const router = express.Router();
 // TODO: Total Sellers,Total order,new Customers,avrg order value (RS) 
 // TODO: reset password
 
-router.get("/", protect, allowRoles("admin"), getAlladmin);
+router.get("/", protect,
+  //  allowRoles("admin"),
+ getAlladmin);
 
-router.get("/:id", protect, allowRoles("admin"), getAdmin);
+router.get("/:id", protect,
+  //  allowRoles("admin"),
+ getAdmin);
 router.get("/profile", protect, allowRoles("admin"), (req, res) => {
   res.json({
     role: req.role,

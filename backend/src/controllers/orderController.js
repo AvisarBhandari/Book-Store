@@ -1,5 +1,5 @@
-import Order from "../models/Order.js";
-import Book from "../models/Book.js";
+import Order from "../models/order.js";
+import Book from "../models/book.js";
 import User from "../models/user.js";
 
 export const buyBook = async (req, res) => {
@@ -8,9 +8,10 @@ export const buyBook = async (req, res) => {
     const { bookId, paymentMethod } = req.body;
 
     const book = await Book.findById(bookId);
+    console.log(userId);
+    console.log(book);
     if (!book) return res.status(404).json({ message: "Book not found" });
 
-    // Prevent duplicate purchase
     const alreadyBought = await Order.findOne({
       user: userId,
       book: bookId,
@@ -28,7 +29,7 @@ export const buyBook = async (req, res) => {
       seller: book.seller,
       priceAtPurchase: book.finalPrice || book.price,
       paymentMethod,
-      paymentStatus: "paid", //  payment success
+      paymentStatus: "paid",
     });
 
     // Update user
