@@ -9,6 +9,14 @@ export async function getAllCategorie(req, res) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 }
+export async function updateBookCountInCategorie(categorieId) {
+  try {
+    const bookCount = await book.countDocuments({ categorie: categorieId });
+    await Categorie.findByIdAndUpdate(categorieId, { bookCount });
+  } catch (error) {
+    console.error("Error updating book count:", error);
+  }
+}
 
 export const getCategorie = async (req, res) => {
   try {
