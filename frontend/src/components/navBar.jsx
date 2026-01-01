@@ -16,19 +16,50 @@ const NavBar = () => {
 
         {/* CENTER (TRUE CENTER) */}
         <div className="flex justify-center">
-          <ul className="flex gap-6 font-semibold">
+          <ul className="flex justify-evenly w-full font-semibold">
             <li>
-              <NavLink to="/" className="hover:text-primary">
+              <NavLink
+                to="/"
+                className="relative inline-block
+               after:content-['']
+               after:absolute after:left-0 after:bottom-0
+               after:h-[2px] after:w-full
+               after:bg-current
+               after:scale-x-0 after:origin-left
+               after:transition-transform after:duration-500
+               hover:after:scale-x-100"
+              >
                 Book
               </NavLink>
             </li>
+
             <li>
-              <NavLink to="/browse" className="hover:text-primary">
+              <NavLink
+                to="/browse"
+                className="relative inline-block
+               after:content-['']
+               after:absolute after:left-0 after:bottom-0
+               after:h-[2px] after:w-full
+               after:bg-current
+               after:scale-x-0 after:origin-left
+               after:transition-transform after:duration-500
+               hover:after:scale-x-100"
+              >
                 Browse
               </NavLink>
             </li>
             <li>
-              <NavLink to="/about" className="hover:text-primary">
+              <NavLink
+                to="/about"
+                className="relative inline-block
+               after:content-['']
+               after:absolute after:left-0 after:bottom-0
+               after:h-[2px] after:w-full
+               after:bg-current
+               after:scale-x-0 after:origin-left
+               after:transition-transform after:duration-500
+               hover:after:scale-x-100"
+              >
                 About Us
               </NavLink>
             </li>
@@ -39,9 +70,10 @@ const NavBar = () => {
         <div className="flex items-center justify-end gap-10">
           <SearchBar />
           <div className="flex gap-3">
-
-          <button className="btn btn-outline btn-sm">Login</button>
-          <button className="btn btn-neutral btn-sm">Register</button>
+            <button className="btn btn-outline btn-sm">Login</button>
+            <button className="btn btn-neutral btn-sm hover:text-black hover:bg-white">
+              Register
+            </button>
           </div>
         </div>
       </div>
