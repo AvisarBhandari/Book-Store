@@ -1,7 +1,10 @@
 import React from "react";
+import NavBar from '../components/navBar.jsx';
 
 const AboutPages = () => {
-  return <div>aboutPages</div>;
+  return <div>
+    <NavBar />
+    aboutPages</div>;
 };
 
 export default AboutPages;

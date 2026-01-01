@@ -11,8 +11,10 @@ node_modules
 dist
 dist-ssr
 *.local
+
 book cover
 
+# Dependency directories
 test.html
 .env
 books
