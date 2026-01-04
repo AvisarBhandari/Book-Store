@@ -7,7 +7,7 @@ const HomePages = () => {
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main>
+      <main className="drop-shadow-xl/50 pb-8">
         <Hero />
       </main>
       <BookCarousel
@@ -15,7 +15,6 @@ const HomePages = () => {
         fetchUrl="http://localhost:5001/api/book/filterBooks?sort=bestseller"
         seeMoreType="bestseller"
       />
-
       homePages
     </div>
   );
