@@ -1,5 +1,5 @@
 import react from "react";
-import BookCard from "./bookCard.jsx";
+import HeroBook from "./Herobook.jsx";
 import book1 from "../assets/book1.jpg";
 import book2 from "../assets/book2.jpg";
 import book3 from "../assets/book3.jpg";
@@ -34,14 +34,14 @@ export default function Hero() {
     -translate-x-4 lg:-translate-x-8
   "
           >
-            <BookCard
+            <HeroBook
               image={book1}
               title="Out of Illusion"
               subtitle="Charles Forrest Jones"
               delay="150ms"
             />
 
-            <BookCard
+            <HeroBook
               image={book2}
               title="Nobody Move"
               subtitle="Denman Hunt"
@@ -50,7 +50,7 @@ export default function Hero() {
               className="translate-y-6"
             />
 
-            <BookCard
+            <HeroBook
               image={book3}
               title="Demise"
               subtitle="Volume I"

@@ -17,7 +17,8 @@
   animation: fadeUp 0.8s ease-out forwards;
 }
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -30,5 +31,15 @@
 }
 
 .font-inter {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
+}
+.swiper-end .swiper-button-next {
+  display: none;
+}
+.hide-prev ~ .book-prev {
+  display: none;
+}
+
+.hide-next ~ .book-next {
+  display: none;
 }
