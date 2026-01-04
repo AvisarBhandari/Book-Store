@@ -2,6 +2,8 @@ import React from "react";
 import NavBar from "../components/navBar.jsx";
 import Hero from "../components/hero.jsx";
 import BookCarousel from "../components/BookCarousel.jsx";
+import OfferSection from '../components/OfferSection.jsx'
+
 
 const HomePages = () => {
   return (
@@ -15,6 +17,9 @@ const HomePages = () => {
         fetchUrl="http://localhost:5001/api/book/filterBooks?sort=bestseller"
         seeMoreType="bestseller"
       />
+      <div>
+        <OfferSection />
+      </div>
       homePages
     </div>
   );
