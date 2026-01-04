@@ -2,8 +2,8 @@ import React from "react";
 import NavBar from "../components/navBar.jsx";
 import Hero from "../components/hero.jsx";
 import BookCarousel from "../components/BookCarousel.jsx";
-import OfferSection from '../components/OfferSection.jsx'
-
+import Footer from "../components/footer.jsx";
+import OfferSection from "../components/OfferSection.jsx";
 
 const HomePages = () => {
   return (
@@ -20,7 +20,9 @@ const HomePages = () => {
       <div>
         <OfferSection />
       </div>
-      homePages
+      <div>
+        <Footer />
+      </div>
     </div>
   );
 };
