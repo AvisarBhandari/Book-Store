@@ -17,7 +17,7 @@ const HomePages = () => {
         fetchUrl="http://localhost:5001/api/book/filterBooks?sort=bestseller"
         seeMoreType="bestseller"
       />
-      <div>
+      <div className="pb-5">
         <OfferSection />
       </div>
       <div>
