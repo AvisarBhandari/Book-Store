@@ -1,9 +1,21 @@
-import React from 'react'
+import React from "react";
+import NavBar from "../components/navBar.jsx";
+import Footer from "../components/footer.jsx";
 
 const BrowsePags = () => {
   return (
-    <div>browsePags</div>
-  )
-}
+    <div class="flex flex-col min-h-screen">
+  <header>
+    <NavBar />
+  </header>
+  <main class="flex-grow">
 
-export default BrowsePags
+  </main>
+  <footer>
+    <Footer />
+  </footer>
+</div>
+  );
+};
+
+export default BrowsePags;
