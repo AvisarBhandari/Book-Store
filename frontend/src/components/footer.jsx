@@ -55,10 +55,10 @@ export default function Footer() {
                 <NavLink to="/about">About us</NavLink>
               </li>
               <li className="hover:text-primary transition-all duration-300 ease-in-out">
-                <NavLink to="/termsofservice">Terms of service</NavLink>
+                <NavLink to="/terms-of-service">Terms of service</NavLink>
               </li>
               <li className="hover:text-primary transition-all duration-300 ease-in-out">
-                <NavLink to="/privacypolicy">Privacy Policy</NavLink>
+                <NavLink to="/privacy-policy">Privacy Policy</NavLink>
               </li>
             </ul>
           </div>

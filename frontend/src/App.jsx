@@ -4,6 +4,9 @@ import HomePages from "./pages/homePages.jsx";
 import AboutPages from "./pages/aboutPages.jsx";
 import BrowsePags from "./pages/browsePags.jsx";
 import BookPage from "./pages/bookPage.jsx";
+import SellerTerms from "./pages/SellerTerms.jsx";
+import TermsofService from "./pages/TermsofService.jsx";
+import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
 
 const App = () => {
   return (
@@ -14,6 +17,9 @@ const App = () => {
         <Route path="/browse/" element={<BrowsePags />} />
         <Route path="/browse/:id" element={<BrowsePags />} />
         <Route path="/book/:id" element={<BookPage />} />
+        <Route path="/seller-terms" element={<SellerTerms />} />
+        <Route path="/terms-of-service" element={<TermsofService />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       </Routes>
     </div>
   );

@@ -8,7 +8,9 @@ const AboutPages = () => {
       <header>
         <NavBar />
       </header>
-      <main class="flex-grow"></main>
+      <main class="flex-grow">
+        
+      </main>
       <footer>
         <Footer />
       </footer>
