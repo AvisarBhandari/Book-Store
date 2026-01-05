@@ -1,6 +1,7 @@
 import React from "react";
 import NavBar from "../components/navBar.jsx";
 import Footer from "../components/footer.jsx";
+import Hero from "../components/first-about.jsx";
 
 const AboutPages = () => {
   return (
@@ -8,8 +9,8 @@ const AboutPages = () => {
       <header>
         <NavBar />
       </header>
-      <main class="flex-grow">
-        
+      <main class="flex-grow pb-10">
+        <Hero />
       </main>
       <footer>
         <Footer />
