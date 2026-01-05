@@ -37,7 +37,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="bg-base-100 pb-20 relative overflow-hidden">
+    <section className="bg-base-100  pt-15 relative overflow-hidden">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
           {/* LEFT */}

@@ -9,9 +9,13 @@ const AboutPages = () => {
       <header>
         <NavBar />
       </header>
-      <main class="flex-grow pb-10">
-        <Hero />
+      <main className="flex-grow">
+        <div className="pb-10">
+          <Hero />
+        </div>
+        <div className="drop-shadow-lg w-full shadow-xl h-12 bg-white rounded-xl" />
       </main>
+
       <footer>
         <Footer />
       </footer>
