@@ -30,9 +30,16 @@
   animation: float 6s ease-in-out infinite;
 }
 
-.font-inter {
-  font-family: "Inter", sans-serif;
+
+@font-face {
+  font-family: "Gilroy";
+  src: url("/fonts/Gilroy-Bold.ttf") format("truetype"); /* Match your .ttf file */
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
 }
+
+
 .swiper-end .swiper-button-next {
   display: none;
 }

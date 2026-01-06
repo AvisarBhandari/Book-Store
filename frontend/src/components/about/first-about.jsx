@@ -37,11 +37,11 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="bg-base-100  pt-15 relative overflow-hidden">
-      <div className="container mx-auto px-6">
+    <section className="bg-base-100  py-15 relative overflow-hidden">
+      <div className="container mx-auto px-7">
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
           {/* LEFT */}
-          <div className="ml-6">
+          <div className="ml-6 pl-[2.7rem]">
             <h1 className="text-6xl lg:text-7xl font-bold leading-tight">
               Every Reader
               <br /> Deserves a Verse

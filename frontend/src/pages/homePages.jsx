@@ -12,7 +12,7 @@ const HomePages = () => {
       <main className=" pb-8">
         <Hero />
       </main>
-      <div className="drop-shadow-lg w-full shadow-xl h-12 bg-white rounded-xl" />
+      <div className="drop-shadow-lg w-full shadow-xl h-12 bg-white " />
 
       <BookCarousel
         title="Bestsellers"
