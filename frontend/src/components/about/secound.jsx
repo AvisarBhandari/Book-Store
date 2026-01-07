@@ -1,4 +1,7 @@
 import React from "react";
+import bookCover1 from "../../assets/bookCover1.jpg";
+import bookCover2 from "../../assets/bookCover2.jpg";
+import bookCover3 from "../../assets/bookCover3.jpg";
 
 const Second = () => {
   return (
@@ -8,7 +11,7 @@ const Second = () => {
           {/* LEFT CONTENT */}
           <div>
             <div className="ml-6 pl-[2.7rem]">
-              <div className="font-gilroy text-red-700 tracking-[0.5em]">
+              <div className="font-gilroy text-red-700 tracking-[0.5em] ml-3 font">
                 A BIT
               </div>
               <h1 className="text-6xl lg:text-7xl font-bold font-inter mt-2">
@@ -24,7 +27,7 @@ const Second = () => {
               </p>
             </div>
             {/* BUTTON — naturally left aligned */}
-            <button className="group relative inline-block focus:outline-none">
+            <button className="group relative inline-block focus:outline-none hover:drop-shadow-lg">
               <svg
                 viewBox="0 0 379 70"
                 className=" 
@@ -91,8 +94,37 @@ const Second = () => {
           </div>
 
           {/* RIGHT CONTENT */}
-          <div className="flex justify-center items-end">
-            {/* book covers */}
+          <div className="w-[550px] h-[550px] relative">
+            <img
+              src={bookCover1}
+              className="w-[86%] h-[29%] object-cover rounded-3xl"
+            />
+
+            <img
+              src={bookCover2}
+              className="w-[86%] h-[54%] object-cover rounded-3xl absolute top-[32%] right-[20%]"
+            />
+
+            <img
+              src={bookCover3}
+              className="w-[40%] h-[40%] object-cover rounded-3xl absolute bottom-0 right-[80%]"
+            />
+
+            <div
+              className="
+    w-[27%] h-[21%]
+    bg-black rounded-3xl
+    absolute right-[57%] bottom-3
+    flex items-center justify-center
+    text-white text-center
+    font-gilroy text-4xl font-bold
+  "
+            >
+              <div>
+                100+ <br />
+                Books
+              </div>
+            </div>
           </div>
         </div>
       </div>
