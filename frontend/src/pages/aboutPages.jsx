@@ -3,6 +3,8 @@ import NavBar from "../components/navBar.jsx";
 import Footer from "../components/footer.jsx";
 import Hero from "../components/about/first-about.jsx";
 import Second from "../components/about/secound.jsx";
+import Third from "../components/about/third.jsx";
+import Forth from "../components/about/fourth.jsx";
 
 const AboutPages = () => {
   return (
@@ -17,6 +19,8 @@ const AboutPages = () => {
         <div className="drop-shadow-lg w-full shadow-xl h-12 bg-white " />
         <div>
           <Second />
+          <Third />
+          <Forth />
         </div>
       </main>
 
