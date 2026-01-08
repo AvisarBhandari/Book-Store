@@ -25,14 +25,16 @@ export const createBook = async (req, res) => {
       price,
       discountPercentage,
       genres,
+      catagorie,
+      catagorieID,
       seller,
     } = req.body;
 
     // Validate required fields
-    if (!title || !author || !description || !price || !seller) {
+    if (!title || !author || !description || !price || !seller || !catagorie || !catagorieID) {
       return res.status(400).json({
         success: false,
-        message: "Title, author, description, price, and seller are required",
+        message: "Title, author, description, price, seller, catagorie, and catagorieID are required",
       });
     }
 
@@ -59,6 +61,8 @@ export const createBook = async (req, res) => {
       discountPercentage: discountPercentage ? Number(discountPercentage) : 0,
       genres: genres ? genres.split(",") : [],
       seller,
+      catagorie,
+      catagorieID,
       coverImage: req.files.coverImage[0].path,
       bookFile: req.files.bookFile[0].path,
     });
@@ -85,6 +89,8 @@ export const updateBook = async (req, res) => {
       title,
       author,
       description,
+      categorie,
+      categorieID,
       price,
       discountPercentage,
       genres,
@@ -107,6 +113,8 @@ export const updateBook = async (req, res) => {
       book.discountPercentage = Number(discountPercentage);
     if (genres) book.genres = genres.split(",");
     if (seller) book.seller = seller;
+    if (categorie) book.catagorie = categorie;
+    if (categorieID) book.catagorieID = categorieID;
 
     // Delete previous files if new ones are uploaded
     if (req.files) {

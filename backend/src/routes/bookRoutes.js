@@ -8,7 +8,7 @@ import {
   fuzzySearchBooks,
   searchSuggestions,
 } from "../controllers/bookController.js";
-import filterBooks from "../controllers/filter.js";
+import { getFilterOptions, filterBooks } from "../controllers/filter.js";
 
 const router = express.Router();
 //TODO: reviews and ratings
@@ -19,7 +19,8 @@ const router = express.Router();
 router.get("/", getAllBooks);
 
 // Filter
-router.get("/filterBooks", filterBooks);
+router.get("/filter", filterBooks);
+router.get("/filter/options", getFilterOptions);
 router.get("/search/fuzzy", fuzzySearchBooks);
 router.get("/search/suggestions", searchSuggestions);
 
