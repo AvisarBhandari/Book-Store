@@ -5,10 +5,7 @@ import {
   createBook,
   deleteBook,
   updateBook,
-  fuzzySearchBooks,
-  searchSuggestions,
 } from "../controllers/bookController.js";
-import { getFilterOptions, filterBooks } from "../controllers/filter.js";
 
 const router = express.Router();
 //TODO: reviews and ratings
@@ -17,12 +14,6 @@ const router = express.Router();
 //TODO: total book,sold,revenue for sellers
 //TODO: update book details
 router.get("/", getAllBooks);
-
-// Filter
-router.get("/filter", filterBooks);
-router.get("/filter/options", getFilterOptions);
-router.get("/search/fuzzy", fuzzySearchBooks);
-router.get("/search/suggestions", searchSuggestions);
 
 router.post(
   "/create",

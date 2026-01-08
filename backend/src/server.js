@@ -11,6 +11,7 @@ import userRoutes from "./routes/userRoutes.js";
 import rateLimiter from "./middlewares/rateLimiter.js";
 import categorieRoutes from "./routes/categorieRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import search from "./routes/searchRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -40,6 +41,7 @@ app.use("/api/seller", sellerRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/categorie", categorieRoutes);
+app.use("/api/search", search);
 
 // Connect DB and start server
 connectDB().then(() => {

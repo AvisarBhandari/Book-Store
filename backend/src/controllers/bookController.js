@@ -181,42 +181,4 @@ export const deleteBook = async (req, res) => {
   }
 };
 
-export const fuzzySearchBooks = async (req, res) => {
-  try {
-    const { q } = req.query;
-    if (!q) return res.json([]);
 
-    const books = await Book.find();
-    const query = q.toLowerCase();
-
-    const results = books
-      .map((book) => ({
-        book,
-        score: similarityScore(query, book.title.toLowerCase()),
-      }))
-      .filter((item) => item.score > 0.4)
-      .sort((a, b) => b.score - a.score)
-      .map((item) => item.book);
-
-    res.json(results);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-export const searchSuggestions = async (req, res) => {
-  try {
-    const { q } = req.query;
-    if (!q) return res.json([]);
-
-    const regex = new RegExp("^" + q, "i");
-
-    const suggestions = await Book.find({ title: regex })
-      .sort({ views: -1 }) // popularity
-      .limit(5)
-      .select("title");
-
-    res.json(suggestions);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
