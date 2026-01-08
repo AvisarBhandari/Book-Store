@@ -6,7 +6,7 @@ import searchAnalytics from "../models/searchAnalytics.js";
 
 export const searchBooks = async (req, res) => {
   try {
-    const { q } = req.query;
+    const { q, filter, minPrice, maxPrice } = req.query;
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.max(parseInt(req.query.limit) || 12, 1);
     const skip = (page - 1) * limit;
@@ -21,12 +21,37 @@ export const searchBooks = async (req, res) => {
       });
     }
 
-    const books = await Book.find({ status: "approved" })
+    // Fetch approved books
+    let books = await Book.find({ status: "approved" })
       .populate("seller", "name storeName")
       .populate("catagorieID", "name keywords")
       .lean();
 
-    const ranked = rankBooks(books, q);
+    // Fuzzy search ranking
+    let ranked = rankBooks(books, q);
+
+    // Apply filter if provided
+    if (filter === "new") {
+      // Sort by creation date descending
+      ranked.sort(
+        (a, b) => new Date(b.book.createdAt) - new Date(a.book.createdAt)
+      );
+    } else if (filter === "bestseller") {
+      // Sort by sold count descending
+      ranked.sort((a, b) => (b.book.soldCount || 0) - (a.book.soldCount || 0));
+    } else if (filter === "discount") {
+      // Only include books with a discount
+      ranked = ranked.filter((r) => r.book.discountPercentage > 0);
+    }
+
+    // Apply price range filter
+    const min = minPrice ? parseFloat(minPrice) : 0;
+    const max = maxPrice ? parseFloat(maxPrice) : Infinity;
+
+    ranked = ranked.filter((r) => {
+      const price = r.book.finalPrice || r.book.price;
+      return price >= min && price <= max;
+    });
 
     const totalResults = ranked.length;
     const totalPages = Math.ceil(totalResults / limit);
@@ -43,6 +68,7 @@ export const searchBooks = async (req, res) => {
       data: paginatedResults,
     });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
