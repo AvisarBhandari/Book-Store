@@ -7,6 +7,9 @@ export default {
     extend: {
       fontFamily: {
         gilroy: ["Gilroy", "sans-serif"],
+        poly: ["Poly", "serif"],
+        milonga: ["Milonga", "serif"],
+        montserrat: ["Montserrat", "sans-serif"],
       },
     },
   },

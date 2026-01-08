@@ -1,6 +1,13 @@
+@import url("https://fonts.googleapis.com/css2?family=Milonga&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poly:ital@0;1&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@theme {
+  --font-Milonga: "Milonga", serif;
+  --font-Poly: "Poly", serif;
+  --font-Montserrat: "Montserrat", sans-serif;
+}
 
 @keyframes fadeUp {
   from {
@@ -30,7 +37,6 @@
   animation: float 6s ease-in-out infinite;
 }
 
-
 @font-face {
   font-family: "Gilroy";
   src: url("/fonts/Gilroy-Bold.ttf") format("truetype"); /* Match your .ttf file */
@@ -38,7 +44,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 
 .swiper-end .swiper-button-next {
   display: none;
@@ -49,4 +54,48 @@
 
 .hide-next ~ .book-next {
   display: none;
+}
+.book {
+  transform-origin: top center;
+  animation: swing 5s ease-in-out infinite;
+}
+
+.book-vertical {
+  animation: hang-bounce 3.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  transform-origin: top center;
+}
+
+@keyframes hang-bounce {
+  0% {
+    transform: translateY(0) scaleY(1);
+  }
+
+  30% {
+    transform: translateY(6px) scaleY(1.02);
+  }
+
+  55% {
+    transform: translateY(10px) scaleY(0.98);
+  }
+
+  75% {
+    transform: translateY(4px) scaleY(1.01);
+  }
+
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+}
+.string {
+  animation: string-stretch 3.2s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+@keyframes string-stretch {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.01);
+  }
 }
