@@ -5,7 +5,7 @@ import { NavLink } from "react-router";
 export default function Footer() {
   return (
     <footer className="bg-[#f7f4f2] text-gray-700">
-      <div className="max-w-6xl mx-auto px-4 py-10">
+      <div className="max-w-6xl mx-auto px-4 pt-10 pb-3">
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
           {/* Contact Info */}
@@ -103,7 +103,7 @@ export default function Footer() {
         </div>
 
         {/* Divider */}
-        <div className="mt-10 border-t border-gray-300 pt-4 text-center text-xs text-gray-600">
+        <div className="mt-10 border-t border-gray-300 pt-2 text-center text-xs text-gray-600">
           © Copyright <span className="font-bold">ReadVerse</span> All Rights
           Reserved
         </div>

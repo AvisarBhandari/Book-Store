@@ -6,7 +6,7 @@ import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 
-import BookCard from "./BookCard";
+import BookCard from "./bookCard";
 
 /* ---------------- Skeleton Card ---------------- */
 function BookCardSkeleton() {
@@ -124,7 +124,7 @@ export default function BookCarousel({ title, fetchUrl, seeMoreType }) {
         >
           {(loading ? Array.from({ length: 3 }) : books).map((book, index) => (
             <SwiperSlide key={book?._id || index}>
-              {loading ? <BookCardSkeleton /> : <BookCard book={book} />}
+              {loading ? <BookCardSkeleton /> : <BookCard bookId={book._id} />}
             </SwiperSlide>
           ))}
         </Swiper>

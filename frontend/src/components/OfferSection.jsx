@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "http://localhost:5001/api/book/filterBooks?sort=discount";
+const API_URL = "http://localhost:5001/api/search/filter?sort=discount";
 
 /* Smooth shield silhouette (rounded bottom) */
 const SHIELD_PATH =
@@ -60,8 +60,8 @@ export default function OfferSection() {
 
         <div className="flex justify-center mt-16">
           <button
-            onClick={() => navigate("/browse/discount")}
-            className="px-6 py-2  bg-gray-900 text-white text-sm hover:border-black  transition"
+            onClick={() => navigate("/deals")}
+            className="px-6 py-2  bg-gray-900 text-white text-sm hover:border-black hover:drop-shadow-lg  transition"
           >
             See all
           </button>
