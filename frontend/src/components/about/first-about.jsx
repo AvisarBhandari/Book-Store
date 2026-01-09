@@ -28,7 +28,7 @@ export default function Hero() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5001/api/book/filterBooks?sort=bestseller")
+    fetch("http://localhost:5001/api/search/filter?sort=bestseller")
       .then((res) => res.json())
       .then((data) => {
         setBooks(data?.books?.slice(0, 3));
