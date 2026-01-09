@@ -67,69 +67,41 @@ export const filterBooks = async (req, res) => {
       maxPrice,
       sort,
       sellerId,
-      page = 1,
-      limit = 12,
     } = req.query;
+
+    const pageNum = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limitNum = Math.max(parseInt(req.query.limit, 10) || 12, 1);
 
     const query = { status: "approved" };
 
-    /* CATEGORY */
-    if (categories) {
-      query.catagorie = { $in: categories.split(",") };
-    }
+    if (categories) query.catagorie = { $in: categories.split(",") };
+    if (genres) query.genres = { $in: genres.split(",") };
+    if (author) query.author = { $in: author.split(",") };
+    if (publisher) query.publisher = publisher;
+    if (language) query.language = language;
 
-    /* GENRES */
-    if (genres) {
-      query.genres = { $in: genres.split(",") };
-    }
+    if (minRating) query.rating = { $gte: Number(minRating) };
 
-    /* AUTHOR (multi-select) */
-    if (author) {
-      query.author = { $in: author.split(",") };
-    }
-
-    /* PUBLISHER */
-    if (publisher) {
-      query.publisher = publisher;
-    }
-
-    /* LANGUAGE */
-    if (language) {
-      query.language = language;
-    }
-
-    /* RATING */
-    if (minRating) {
-      query.rating = { $gte: Number(minRating) };
-    }
-
-    /* PAGE COUNT */
     if (minPages || maxPages) {
       query.pages = {};
       if (minPages) query.pages.$gte = Number(minPages);
       if (maxPages) query.pages.$lte = Number(maxPages);
     }
 
-    /* DISCOUNT */
     if (discount === "true") {
       query.discountPercentage = { $gt: 0 };
     }
 
-    /* PRICE */
     if (minPrice || maxPrice) {
       query.finalPrice = {};
       if (minPrice) query.finalPrice.$gte = Number(minPrice);
       if (maxPrice) query.finalPrice.$lte = Number(maxPrice);
     }
 
-    /* SELLER */
-    if (sellerId) {
-      query.seller = sellerId;
-    }
+    if (sellerId) query.seller = sellerId;
 
     let booksQuery = Book.find(query);
 
-    /* SORT */
     if (sort) {
       const sortOptions = {};
       sort.split(",").forEach((s) => {
@@ -143,18 +115,18 @@ export const filterBooks = async (req, res) => {
       booksQuery = booksQuery.sort(sortOptions);
     }
 
-    const skip = (page - 1) * limit;
+    const skip = (pageNum - 1) * limitNum;
 
     const [books, total] = await Promise.all([
-      booksQuery.skip(skip).limit(Number(limit)),
+      booksQuery.skip(skip).limit(limitNum),
       Book.countDocuments(query),
     ]);
 
     res.json({
       success: true,
       total,
-      page: Number(page),
-      pages: Math.ceil(total / limit),
+      page: pageNum,
+      pages: Math.ceil(total / limitNum),
       books,
     });
   } catch (err) {
