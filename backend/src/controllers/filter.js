@@ -3,9 +3,20 @@ import Seller from "../models/seller.js";
 
 export const getFilterOptions = async (req, res) => {
   try {
-    const [categories, genres, priceStats, sellers] = await Promise.all([
+    const [
+      categories,
+      genres,
+      authors,
+      languages,
+      publishers,
+      priceStats,
+      sellers,
+    ] = await Promise.all([
       Book.distinct("catagorie", { status: "approved" }),
       Book.distinct("genres", { status: "approved" }),
+      Book.distinct("author", { status: "approved" }),
+      Book.distinct("language", { status: "approved" }),
+      Book.distinct("publisher", { status: "approved" }),
       Book.aggregate([
         { $match: { status: "approved" } },
         {
@@ -24,6 +35,9 @@ export const getFilterOptions = async (req, res) => {
       filters: {
         categories,
         genres,
+        authors,
+        languages,
+        publishers,
         priceRange: priceStats[0] || { minPrice: 0, maxPrice: 0 },
         sellers,
         discountAvailable: true,
@@ -36,12 +50,13 @@ export const getFilterOptions = async (req, res) => {
     });
   }
 };
+
 export const filterBooks = async (req, res) => {
   try {
     const {
       categories,
       genres,
-      authors,
+      author,
       publisher,
       language,
       minRating,
@@ -69,8 +84,8 @@ export const filterBooks = async (req, res) => {
     }
 
     /* AUTHOR (multi-select) */
-    if (authors) {
-      query.author = { $in: authors.split(",") };
+    if (author) {
+      query.author = { $in: author.split(",") };
     }
 
     /* PUBLISHER */

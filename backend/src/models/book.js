@@ -2,18 +2,18 @@ import mongoose from "mongoose";
 
 const bookSchema = new mongoose.Schema(
   {
-    title: String,
-    author: String,
-    description: String,
+    title: { type: String, required: true },
+    author: { type: String, required: true },
+    description: { type: String, required: true },
 
-    price: Number,
+    price: { type: Number, required: true },
     discountPercentage: { type: Number, default: 0 },
     finalPrice: Number,
 
     genres: [String],
 
-    coverImage: String,
-    bookFile: String,
+    coverImage: { type: String, required: true },
+    bookFile: { type: String, required: true },
 
     soldCount: { type: Number, default: 0 },
 
@@ -28,6 +28,9 @@ const bookSchema = new mongoose.Schema(
       required: true,
     },
     catagorie: { type: String, required: true },
+    language: { type: String, default: "English" },
+    publisher: { type: String, default: "Self-Published" },
+    pages: { type: Number, default: 0 },
 
     status: {
       type: String,
