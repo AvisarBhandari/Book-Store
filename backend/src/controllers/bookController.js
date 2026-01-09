@@ -118,7 +118,8 @@ export const updateBook = async (req, res) => {
       discountPercentage,
       genres,
       seller,
-      reatings,
+      ratings,
+      reviewCount,
     } = req.body;
 
     const book = await Book.findById(id);
@@ -145,7 +146,8 @@ export const updateBook = async (req, res) => {
     book.catagorie = resolvedCatagorie;
     book.catagorieID = resolvedCatagorieID;
 
-    if (reatings) book.reatings = Number(reatings);
+    if (ratings) book.ratings = Number(ratings);
+    if (reviewCount) book.reviewCount = Number(reviewCount);
 
     // If category data is still missing, fail fast with a clear message
     if (!book.catagorie || !book.catagorieID) {

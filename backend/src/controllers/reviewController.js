@@ -62,7 +62,7 @@ const updateBookRating = async (bookId) => {
   ]);
 
   await Book.findByIdAndUpdate(bookId, {
-    ratings: stats[0]?.avgRating || 0,
+    averageRating: stats[0]?.avgRating || 0,
     reviewCount: stats[0]?.count || 0,
   });
 };
