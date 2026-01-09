@@ -6,7 +6,7 @@ import searchAnalytics from "../models/searchAnalytics.js";
 
 export const searchBooks = async (req, res) => {
   try {
-    const { q, filter, minPrice, maxPrice } = req.query;
+    const { q, filter, minPrice, maxPrice, ratings, minRating } = req.query;
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.max(parseInt(req.query.limit) || 12, 1);
     const skip = (page - 1) * limit;
@@ -27,20 +27,17 @@ export const searchBooks = async (req, res) => {
       .populate("catagorieID", "name keywords")
       .lean();
 
-    // Fuzzy search ranking
+    // Fuzzy search ranking (your existing function)
     let ranked = rankBooks(books, q);
 
-    // Apply filter if provided
+    // Apply filters
     if (filter === "new") {
-      // Sort by creation date descending
       ranked.sort(
         (a, b) => new Date(b.book.createdAt) - new Date(a.book.createdAt)
       );
     } else if (filter === "bestseller") {
-      // Sort by sold count descending
       ranked.sort((a, b) => (b.book.soldCount || 0) - (a.book.soldCount || 0));
     } else if (filter === "discount") {
-      // Only include books with a discount
       ranked = ranked.filter((r) => r.book.discountPercentage > 0);
     }
 
@@ -53,13 +50,26 @@ export const searchBooks = async (req, res) => {
       return price >= min && price <= max;
     });
 
+    // Apply minimum rating filter
+    const ratingParam = ratings ?? minRating;
+    if (ratingParam !== undefined) {
+      const threshold = parseFloat(ratingParam);
+      if (!Number.isNaN(threshold)) {
+        ranked = ranked.filter((r) => {
+          const ratingValue =
+            r.book.ratings ?? r.book.reatings ?? r.book.averageRating ?? 0;
+          return ratingValue >= threshold;
+        });
+      }
+    }
+
+    // Pagination
     const totalResults = ranked.length;
     const totalPages = Math.ceil(totalResults / limit);
 
     const paginatedResults = ranked
       .slice(skip, skip + limit)
       .map((r) => r.book);
-
     res.json({
       page,
       limit,

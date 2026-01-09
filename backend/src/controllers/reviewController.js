@@ -1,6 +1,7 @@
 import Review from "../models/Review.js";
 import Order from "../models/Order.js";
-import Book from "../models/Book.js";
+import Book from "../models/book.js";
+import mongoose from "mongoose";
 
 export const createOrUpdateReview = async (req, res) => {
   try {
@@ -30,6 +31,7 @@ export const createOrUpdateReview = async (req, res) => {
     if (review) {
       review.rating = rating;
       review.comment = comment;
+
       await review.save();
     } else {
       review = await Review.create({
@@ -60,7 +62,7 @@ const updateBookRating = async (bookId) => {
   ]);
 
   await Book.findByIdAndUpdate(bookId, {
-    averageRating: stats[0]?.avgRating || 0,
+    ratings: stats[0]?.avgRating || 0,
     reviewCount: stats[0]?.count || 0,
   });
 };

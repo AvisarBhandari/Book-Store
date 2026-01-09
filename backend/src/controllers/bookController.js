@@ -11,6 +11,18 @@ export async function getAllBooks(req, res) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 }
+export async function getBookById(req, res) {
+  try {
+    const { id } = req.params;
+    const book = await Book.findById(id);
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+    res.status(200).json(book);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+}
 
 export const createBook = async (req, res) => {
   try {
@@ -31,10 +43,19 @@ export const createBook = async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    if (!title || !author || !description || !price || !seller || !catagorie || !catagorieID) {
+    if (
+      !title ||
+      !author ||
+      !description ||
+      !price ||
+      !seller ||
+      !catagorie ||
+      !catagorieID
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Title, author, description, price, seller, catagorie, and catagorieID are required",
+        message:
+          "Title, author, description, price, seller, catagorie, and catagorieID are required",
       });
     }
 
@@ -91,10 +112,13 @@ export const updateBook = async (req, res) => {
       description,
       categorie,
       categorieID,
+      catagorie,
+      catagorieID,
       price,
       discountPercentage,
       genres,
       seller,
+      reatings,
     } = req.body;
 
     const book = await Book.findById(id);
@@ -113,8 +137,23 @@ export const updateBook = async (req, res) => {
       book.discountPercentage = Number(discountPercentage);
     if (genres) book.genres = genres.split(",");
     if (seller) book.seller = seller;
-    if (categorie) book.catagorie = categorie;
-    if (categorieID) book.catagorieID = categorieID;
+
+    // Accept both catagorie/categorie naming, and preserve existing when not provided
+    const resolvedCatagorie = catagorie || categorie || book.catagorie;
+    const resolvedCatagorieID = catagorieID || categorieID || book.catagorieID;
+
+    book.catagorie = resolvedCatagorie;
+    book.catagorieID = resolvedCatagorieID;
+
+    if (reatings) book.reatings = Number(reatings);
+
+    // If category data is still missing, fail fast with a clear message
+    if (!book.catagorie || !book.catagorieID) {
+      return res.status(400).json({
+        success: false,
+        message: "catagorie and catagorieID are required",
+      });
+    }
 
     // Delete previous files if new ones are uploaded
     if (req.files) {
@@ -180,5 +219,3 @@ export const deleteBook = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-
-

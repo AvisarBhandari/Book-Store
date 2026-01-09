@@ -2,6 +2,7 @@ import express from "express";
 import upload from "../middlewares/upload.js";
 import {
   getAllBooks,
+  getBookById,
   createBook,
   deleteBook,
   updateBook,
@@ -23,6 +24,7 @@ router.post(
   ]),
   createBook
 );
+router.get("/:id", getBookById);
 router.put(
   "/update/:id",
   upload.fields([

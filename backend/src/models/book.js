@@ -34,7 +34,11 @@ const bookSchema = new mongoose.Schema(
       enum: ["pending", "approved", "rejected"],
       default: "approved",
     },
-    reatings: {
+    ratings: {
+      type: Number,
+      default: 2,
+    },
+    reviewCount: {
       type: Number,
       default: 0,
     },
