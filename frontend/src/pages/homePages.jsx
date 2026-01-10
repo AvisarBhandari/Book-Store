@@ -12,11 +12,11 @@ const HomePages = () => {
       <main className=" pb-8">
         <Hero />
       </main>
-      <div className="drop-shadow-lg w-full shadow-xl h-12 bg-white " />
+      <div className="drop-shadow-md w-full shadow-sm h-12 bg-white " />
 
       <BookCarousel
         title="Bestsellers"
-        fetchUrl="http://localhost:5001/api/book/filterBooks?sort=bestseller"
+        fetchUrl="http://localhost:5001/api/search/filter?sort=bestseller"
         seeMoreType="bestseller"
       />
       <div className="pb-5">
