@@ -3,61 +3,46 @@ import { toast } from "react-hot-toast";
 
 const CartContext = createContext();
 
-// Track IDs of books that already triggered a toast
-const toastShown = new Set();
+export function formatPrice(value) {
+  return Number(value).toFixed(2);
+}
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
 
   const addToCart = (book) => {
-    setCart((prev) => {
-      const existing = prev.find((item) => item._id === book._id);
+    // Check if already in cart first
+    const exists = cart.find((item) => item._id === book._id);
+    if (exists) {
+      toast("Book already in cart");
+      return;
+    }
 
-      if (existing) {
-        // silently update quantity
-        return prev.map((item) =>
-          item._id === book._id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
+    // Show success toast
+    toast.success(`Added "${book.title}" to cart 🛒`);
 
-      // Show toast only if not shown already
-      if (!toastShown.has(book._id)) {
-        toastShown.add(book._id);
-        toast.success(`Added "${book.title}" to cart 🛒`, {
-          duration: 2000,
-          position: "top-right",
-          style: {
-            borderRadius: "8px",
-            background: "#fff",
-            color: "#333",
-            padding: "12px 16px",
-          },
-        });
-      }
-
-      return [...prev, { ...book, quantity: 1 }];
-    });
+    // Add book to cart
+    setCart((prev) => [
+      ...prev,
+      {
+        _id: book._id,
+        title: book.title,
+        coverImage: book.coverImage,
+        finalPrice: book.finalPrice,
+        author: book.author, // new
+        rating: book.ratings, // new
+      },
+    ]);
   };
 
   const removeFromCart = (id) => {
     setCart((prev) => prev.filter((item) => item._id !== id));
-    toast("Item removed ❌", {
-      duration: 2000,
-      position: "top-right",
-    });
-
-    // Remove from toastShown so user can add again
-    toastShown.delete(id);
+    toast.error("Item removed ❌");
   };
 
   const isInCart = (id) => cart.some((item) => item._id === id);
 
-  const subtotal = cart.reduce(
-    (sum, item) => sum + item.finalPrice * item.quantity,
-    0
-  );
+  const subtotal = cart.reduce((sum, item) => sum + item.finalPrice, 0);
 
   return (
     <CartContext.Provider
