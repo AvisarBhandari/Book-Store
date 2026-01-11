@@ -36,8 +36,8 @@ class InMemoryRateLimiter {
   }
 }
 
-let time = 60,
-  maxRequests = 100;
+let time = 10,
+  maxRequests = 500;
 
 let ratelimit;
 const url = process.env.UPSTASH_REDIS_REST_URL;
