@@ -47,7 +47,7 @@ const SearchBar = () => {
   }, [query]);
 
   return (
-    <div className="relative w-[240px] md:w-[300px]">
+    <div className=" w-[240px] md:w-[300px]">
       {/* ⬇️ FORM SUBMIT → REDIRECT */}
       <form
         className="relative group"

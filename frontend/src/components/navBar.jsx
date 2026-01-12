@@ -20,7 +20,7 @@ const NavBar = () => {
   const { cart, removeFromCart, subtotal } = useCart();
 
   return (
-    <div className="bg-base-100 shadow-sm">
+    <div className="bg-base-100 shadow-sm sticky z-50 ">
       <div className="grid grid-cols-6 items-center px-6 lg:px-20 h-20">
         {/* Logo */}
         <NavLink to="/" className="flex items-center">
@@ -95,7 +95,7 @@ const NavBar = () => {
               )}
             </button>
 
-            <div className="dropdown-content bg-base-100 w-80 p-3 shadow rounded-xl z-[2]">
+            <div className="dropdown-content bg-base-100 w-80 p-3 shadow rounded-xl ">
               <h4 className="font-semibold mb-2">My Cart</h4>
 
               {cart.length === 0 ? (

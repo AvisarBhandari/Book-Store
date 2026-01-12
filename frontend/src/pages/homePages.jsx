@@ -16,7 +16,7 @@ const HomePages = () => {
 
       <BookCarousel
         title="Bestsellers"
-        fetchUrl="http://localhost:5001/api/search/filter?sort=bestseller"
+        fetchUrl="http://localhost:5001/api/search/filter?limit=12&sort=bestseller"
         seeMoreType="bestseller"
       />
       <div className="pb-5">
