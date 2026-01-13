@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { FiHeart, FiShoppingCart } from "react-icons/fi";
+import { useCart } from "../context/CartContext";
 
 export function formatPrice(value) {
   return Number(value).toFixed(2);
 }
 
-/* Skeleton while loading */
 function BookCardSkeleton() {
   return (
     <div className="bg-white rounded-2xl shadow-sm p-4 flex gap-4 h-full animate-pulse">
@@ -24,9 +24,12 @@ function BookCardSkeleton() {
   );
 }
 
-export default function BookCard({ bookId }) {
+export default function BookCard({ bookId, navigate }) {
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
+
+  const { addToCart, isInCart } = useCart();
 
   useEffect(() => {
     let mounted = true;
@@ -35,9 +38,8 @@ export default function BookCard({ bookId }) {
       try {
         const res = await fetch(`http://localhost:5001/api/book/${bookId}`);
         const data = await res.json();
-
         if (mounted) {
-          setBook(data); // assuming API returns the book object directly
+          setBook(data);
           setLoading(false);
         }
       } catch (err) {
@@ -48,18 +50,23 @@ export default function BookCard({ bookId }) {
 
     fetchBook();
 
-    return () => {
-      mounted = false;
-    };
+    return () => (mounted = false);
   }, [bookId]);
 
   if (loading) return <BookCardSkeleton />;
   if (!book) return <p className="text-gray-400">Book not found</p>;
 
-  const rawRating = book.ratings ?? 0;
-  const Rating = Math.round(Number(rawRating));
-  const ratingName = `rating-${book._id}`;
-  console.log("Book ratings:", book.ratings);
+  const inCart = isInCart(book._id);
+
+  const handleAddToCart = () => {
+    if (adding) return;
+    setAdding(true);
+
+    addToCart(book);
+
+    setTimeout(() => setAdding(false), 1000);
+  };
+
   return (
     <div className="group bg-white rounded-2xl shadow-sm p-4 flex gap-4 h-full transition hover:shadow-md">
       {/* Cover */}
@@ -92,16 +99,18 @@ export default function BookCard({ bookId }) {
               Rs {formatPrice(book.price)}
             </span>
           )}
-          <span className="text-xs text-green-600 font-semibold">
-            {book.discountPercentage}% off
-          </span>
+
+          {book.discountPercentage > 0 && (
+            <span className="text-xs text-green-600 font-semibold">
+              {book.discountPercentage}% off
+            </span>
+          )}
         </div>
 
-        {/* ⭐ Rating + Review Count */}
+        {/* ⭐ Rating */}
         <div className="flex items-center gap-2 pt-2">
           <div className="rating rating-sm">
             {[1, 2, 3, 4, 5].map((star) => {
-              // Ensure we have a valid numeric rating
               const numericRating = book.ratings
                 ? Math.round(Number(book.ratings))
                 : 0;
@@ -126,12 +135,29 @@ export default function BookCard({ bookId }) {
 
         {/* Actions */}
         <div className="mt-auto flex items-center gap-3">
-          <button className="flex items-center gap-2 bg-[#FFD84D] text-white px-4 h-[38px] rounded-xl hover:drop-shadow-lg text-sm hover:text-black transition">
-            <FiShoppingCart />
-            Add to basket
-          </button>
+          {!inCart ? (
+            <button
+              onClick={handleAddToCart}
+              disabled={adding}
+              className={`flex items-center gap-2 bg-[#FFD84D] px-4 h-[38px]
+                 rounded-xl text-sm font-medium
+                 hover:scale-105 active:scale-95
+                 transition-all duration-200
+                 ${adding ? "opacity-50 cursor-not-allowed" : ""}`}
+            >
+              <FiShoppingCart className="animate-bounce" />
+              {adding ? "Adding... " : "Add to basket"}
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate("/cart")}
+              className="btn btn-neutral btn-sm w-100 "
+            >
+              Added cart
+            </button>
+          )}
 
-          <button className="h-[38px] w-[38px] rounded-full border flex items-center justify-center text-gray-500 hover:text-red-500 hover:border-red-500 transition">
+          <button className="h-[38px] w-[38px] rounded-full border flex items-center justify-center text-gray-500 hover:text-red-500 transition">
             <FiHeart />
           </button>
         </div>
