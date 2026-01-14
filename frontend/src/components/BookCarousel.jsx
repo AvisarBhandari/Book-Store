@@ -67,7 +67,7 @@ export default function BookCarousel({ title, fetchUrl, seeMoreType }) {
   }, [fetchUrl]);
 
   return (
-    <section className="w-full px-[72px] py-6 bg-gray-50 ">
+    <section className="w-full block  px-[72px] py-6 bg-gray-50 ">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-[22px] font-semibold">{title}</h2>
@@ -80,7 +80,7 @@ export default function BookCarousel({ title, fetchUrl, seeMoreType }) {
       </div>
 
       {/* Carousel Wrapper */}
-      <div className="relative">
+      <div className="relative ">
         {/* Left Arrow */}
         <button
           className="book-prev absolute -left-6 top-1/2 -translate-y-1/2
