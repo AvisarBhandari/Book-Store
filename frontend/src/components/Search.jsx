@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import BookCard from "../components/bookCard.jsx";
-import { useSearchParams } from "react-router-dom";
+import { data, useSearchParams } from "react-router-dom";
 import { FiStar } from "react-icons/fi";
 
 function BookCardSkeleton() {
@@ -23,7 +23,9 @@ function BookCardSkeleton() {
 
 const Search = () => {
   const [searchParams] = useSearchParams();
+
   const query = searchParams.get("q") || "";
+  const categories = searchParams.get("categories") || "";
 
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
@@ -43,9 +45,9 @@ const Search = () => {
   // Build URL with all filters
   const buildUrl = () => {
     const querys = new URLSearchParams();
-    querys.append("q", query);
     querys.append("page", page);
 
+    // FILTERS
     if (filters.bestseller) querys.append("filter", "bestseller");
     else if (filters.discount) querys.append("filter", "discount");
     else if (filters.new) querys.append("filter", "new");
@@ -55,7 +57,11 @@ const Search = () => {
     if (filters.maxPrice) querys.append("maxPrice", filters.maxPrice);
     if (filters.minRating) querys.append("minRating", filters.minRating);
 
-    return `http://localhost:5001/api/search/fuzzy?${querys.toString()}`;
+    if (categories) {
+      return `http://localhost:5001/api/search/filter?categories=${categories.toString()}`;
+    } else {
+      return `http://localhost:5001/api/search/fuzzy?q=${querys.toString()}`;
+    }
   };
 
   const fetchData = async () => {
@@ -65,9 +71,11 @@ const Search = () => {
       const data = await response.json();
 
       console.log("SEARCH RESPONSE:", data);
+      const books = data.data || data.books || [];
+      const totalPages = data.totalPages || data.pages || 1;
 
-      setResults(data?.data || []);
-      setPages(data?.totalPages || 1);
+      setResults(books);
+      setPages(totalPages);
     } catch (err) {
       console.error(err);
       setResults([]);
@@ -81,16 +89,6 @@ const Search = () => {
   useEffect(() => {
     setPage(1);
   }, [query, filters]);
-
-  // FETCH DATA (THIS WAS MISSING ❌)
-  useEffect(() => {
-    if (!query.trim()) {
-      setResults([]);
-      return;
-    }
-
-    fetchData();
-  }, [query, filters, page]);
 
   useEffect(() => {
     if (!query.trim()) {
@@ -226,8 +224,11 @@ const Search = () => {
       <section className="col-span-3 p-6">
         <div>
           <h2 className="text-lg font-semibold mb-6">
-            Search Results for "{query}"
+            {categories
+              ? `Books in "${categories}"`
+              : `Search Results for "${query}"`}
           </h2>
+
           {loading ? (
             <div className="grid grid-cols-2 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (

@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
+
 import HeroBook from "./AboutBook.jsx";
 
 function HeroBookSkeleton({ layer }) {
@@ -51,10 +53,12 @@ export default function Hero() {
               Read Verse was born from the belief that stories connect us — one
               page, one emotion, one verse at a time.
             </p>
-
-            <button className="btn btn-neutral rounded-none hover:bg-white hover:text-black">
+            <NavLink
+              to="/browse"
+              className="btn btn-neutral rounded-none hover:bg-white hover:text-black"
+            >
               Browse Books
-            </button>
+            </NavLink>
           </div>
 
           {/* RIGHT BOOK COVERS */}

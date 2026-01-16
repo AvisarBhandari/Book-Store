@@ -1,4 +1,5 @@
 import react from "react";
+import { NavLink } from "react-router-dom";
 import HeroBook from "./Herobook.jsx";
 import book1 from "../assets/book1.jpg";
 import book2 from "../assets/book2.jpg";
@@ -20,10 +21,12 @@ export default function Hero() {
               A place where stories live, imagination thrives, and every shelf
               holds a new adventure.
             </p>
-
-            <button className="btn btn-neutral rounded-none hover:bg-white hover:text-black">
+            <NavLink
+              to="/browse"
+              className="btn btn-neutral rounded-none hover:bg-white hover:text-black"
+            >
               Explore now
-            </button>
+            </NavLink>
           </div>
 
           {/* RIGHT BOOK COVERS */}
