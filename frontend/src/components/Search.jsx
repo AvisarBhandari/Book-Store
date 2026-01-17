@@ -25,7 +25,6 @@ const Search = () => {
   const [searchParams] = useSearchParams();
 
   const query = searchParams.get("q") || "";
-  const categories = searchParams.get("categories") || "";
 
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
@@ -44,24 +43,26 @@ const Search = () => {
 
   // Build URL with all filters
   const buildUrl = () => {
-    const querys = new URLSearchParams();
-    querys.append("page", page);
+    const params = new URLSearchParams();
+
+    // REQUIRED
+    params.append("q", query.trim());
+    params.append("page", page);
 
     // FILTERS
-    if (filters.bestseller) querys.append("filter", "bestseller");
-    else if (filters.discount) querys.append("filter", "discount");
-    else if (filters.new) querys.append("filter", "new");
-    else if (filters.ratingSort) querys.append("filter", "rating");
+    if (filters.bestseller) params.append("filter", "bestseller");
+    else if (filters.discount) params.append("filter", "discount");
+    else if (filters.new) params.append("filter", "new");
+    else if (filters.ratingSort) params.append("filter", "rating");
 
-    if (filters.minPrice) querys.append("minPrice", filters.minPrice);
-    if (filters.maxPrice) querys.append("maxPrice", filters.maxPrice);
-    if (filters.minRating) querys.append("minRating", filters.minRating);
+    if (filters.minPrice) params.append("minPrice", filters.minPrice);
+    if (filters.maxPrice) params.append("maxPrice", filters.maxPrice);
+    if (filters.minRating) params.append("minRating", filters.minRating);
 
-    if (categories) {
-      return `http://localhost:5001/api/search/filter?categories=${categories.toString()}`;
-    } else {
-      return `http://localhost:5001/api/search/fuzzy?q=${querys.toString()}`;
-    }
+    const url = `http://localhost:5001/api/search/fuzzy?${params.toString()}`;
+
+    console.log("QUERY STRING:", url);
+    return url;
   };
 
   const fetchData = async () => {
@@ -224,9 +225,7 @@ const Search = () => {
       <section className="col-span-3 p-6">
         <div>
           <h2 className="text-lg font-semibold mb-6">
-            {categories
-              ? `Books in "${categories}"`
-              : `Search Results for "${query}"`}
+            Search Results for "{query}"
           </h2>
 
           {loading ? (

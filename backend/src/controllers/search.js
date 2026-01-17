@@ -6,7 +6,7 @@ import searchAnalytics from "../models/searchAnalytics.js";
 
 export const searchBooks = async (req, res) => {
   try {
-    const { q, filter, minPrice, maxPrice, minRating } = req.query;
+    const { q, filter, minPrice, maxPrice, minRating, genre } = req.query;
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.max(parseInt(req.query.limit) || 12, 1);
     const skip = (page - 1) * limit;
@@ -34,6 +34,9 @@ export const searchBooks = async (req, res) => {
     if (minRating) {
       const minR = parseFloat(minRating);
       ranked = ranked.filter((r) => (r.book.ratings || 0) >= minR);
+    }
+    if (genre) {
+      ranked = ranked.filter((r) => r.book.genres.includes(genre));
     }
 
     // Apply price range filter

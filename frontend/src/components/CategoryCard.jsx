@@ -14,11 +14,9 @@ const CategoryCard = ({ category }) => {
             {/* keywords */}
             <div className="flex flex-wrap gap-2 mt-3">
               {category.keywords?.filter(Boolean).map((keyword, index) => (
-                <NavLink to={`/search?categories=${keyword}`} className=" ">
-                  <span key={index} className="badge badge-outline text-xs">
-                    {keyword}
-                  </span>
-                </NavLink>
+                <span key={index} className="badge badge-outline text-xs">
+                  {keyword}
+                </span>
               ))}
             </div>
           </div>

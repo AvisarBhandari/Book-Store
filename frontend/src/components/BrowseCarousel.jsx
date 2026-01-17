@@ -21,12 +21,10 @@ const BrowseCarousel = () => {
 
         const data = await res.json();
 
-        // ✅ CORRECT PATH
         const genreList = data?.filters?.genres || [];
 
         setGenres(genreList);
 
-        // ✅ Auto-select first genre
         if (genreList.length > 0) {
           setSelectedGenre(genreList[0]);
         }
