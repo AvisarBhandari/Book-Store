@@ -22,12 +22,13 @@ const bookSchema = new mongoose.Schema(
       ref: "Seller",
       default: null,
     },
-    catagorieID: {
+
+    categoryID: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Categorie",
+      ref: "Category",
       required: true,
     },
-    catagorie: { type: String, required: true },
+    category: { type: String, required: true },
     language: { type: String, default: "English" },
     publisher: { type: String, default: "Self-Published" },
     pages: { type: Number, default: 0 },

@@ -13,6 +13,10 @@ const reviewSchema = new mongoose.Schema(
       ref: "Book",
       required: true,
     },
+    hasbuy: {
+      type: Boolean,
+      default: false,
+    },
 
     rating: {
       type: Number,
@@ -27,7 +31,7 @@ const reviewSchema = new mongoose.Schema(
       maxlength: 1000,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // One review per user per book

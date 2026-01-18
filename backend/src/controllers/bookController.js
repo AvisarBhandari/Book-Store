@@ -26,7 +26,7 @@ export async function getBookById(req, res) {
 
 export const createBook = async (req, res) => {
   try {
-    // Debug: log incoming files & body
+    // Debug
     console.log("Files received:", req.files);
     console.log("Body received:", req.body);
 
@@ -37,8 +37,8 @@ export const createBook = async (req, res) => {
       price,
       discountPercentage,
       genres,
-      catagorie,
-      catagorieID,
+      category,
+      categoryID,
       seller,
     } = req.body;
 
@@ -49,13 +49,13 @@ export const createBook = async (req, res) => {
       !description ||
       !price ||
       !seller ||
-      !catagorie ||
-      !catagorieID
+      !category ||
+      !categoryID
     ) {
       return res.status(400).json({
         success: false,
         message:
-          "Title, author, description, price, seller, catagorie, and catagorieID are required",
+          "Title, author, description, price, seller, category, and categoryID are required",
       });
     }
 
@@ -82,8 +82,8 @@ export const createBook = async (req, res) => {
       discountPercentage: discountPercentage ? Number(discountPercentage) : 0,
       genres: genres ? genres.split(",") : [],
       seller,
-      catagorie,
-      catagorieID,
+      category,
+      categoryID,
       coverImage: req.files.coverImage[0].path,
       bookFile: req.files.bookFile[0].path,
     });
@@ -110,10 +110,8 @@ export const updateBook = async (req, res) => {
       title,
       author,
       description,
-      categorie,
-      categorieID,
-      catagorie,
-      catagorieID,
+      category,
+      categoryID,
       price,
       discountPercentage,
       genres,
@@ -139,21 +137,20 @@ export const updateBook = async (req, res) => {
     if (genres) book.genres = genres.split(",");
     if (seller) book.seller = seller;
 
-    // Accept both catagorie/categorie naming, and preserve existing when not provided
-    const resolvedCatagorie = catagorie || categorie || book.catagorie;
-    const resolvedCatagorieID = catagorieID || categorieID || book.catagorieID;
+    // Accept both category/category naming, and preserve existing when not provided
+    const resolvedCategory = category || category || book.category;
+    const resolvedCategoryID = categoryID || categoryID || book.categoryID;
 
-    book.catagorie = resolvedCatagorie;
-    book.catagorieID = resolvedCatagorieID;
-
+    book.category = resolvedCategory;
+    book.categoryID = resolvedCategoryID;
     if (ratings) book.ratings = Number(ratings);
     if (reviewCount) book.reviewCount = Number(reviewCount);
 
     // If category data is still missing, fail fast with a clear message
-    if (!book.catagorie || !book.catagorieID) {
+    if (!book.category || !book.categoryID) {
       return res.status(400).json({
         success: false,
-        message: "catagorie and catagorieID are required",
+        message: "category and categoryID are required",
       });
     }
 

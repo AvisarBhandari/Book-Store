@@ -72,8 +72,11 @@ export default function OfferSection() {
 }
 
 /* ---------------- Shield ---------------- */
-
 function Shield({ book, onClick }) {
+  const imageUrl = `http://localhost:5001/${book.coverImage
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")}`;
+
   return (
     <div
       className="relative w-[260px] h-[340px] overflow-hidden"
@@ -87,22 +90,19 @@ function Shield({ book, onClick }) {
           transition={{ type: "spring", stiffness: 140, damping: 16 }}
           style={{
             clipPath: piece.inset,
-            backgroundImage: `url(http://localhost:5001/${book.coverImage})`,
+            backgroundImage: `url(${imageUrl})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
           onClick={onClick}
         >
-          <div className="absolute inset-0 bg-black/20 flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/10 flex items-end justify-center">
             <span className="mb-3 text-xs font-semibold text-white">
               {book.discountPercentage}% OFF
             </span>
           </div>
         </motion.div>
       ))}
-
-      {/* Outline */}
-      <div className="absolute inset-0 border border-black/10 pointer-events-none" />
     </div>
   );
 }

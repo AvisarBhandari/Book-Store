@@ -1,12 +1,14 @@
 import Book from "../models/book.js";
-import Categorie from "../models/Categorie.js";
+import category from "../models/Category.js";
 import Seller from "../models/seller.js";
 import { similarityScore, rankBooks } from "../algorithem/fuzzySearch.js";
 import searchAnalytics from "../models/searchAnalytics.js";
 
 export const searchBooks = async (req, res) => {
   try {
-    const { q, filter, minPrice, maxPrice, minRating, genre } = req.query;
+    const { q, filter, minPrice, maxPrice, minRating, genre, category } =
+      req.query;
+
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.max(parseInt(req.query.limit) || 12, 1);
     const skip = (page - 1) * limit;
@@ -21,25 +23,30 @@ export const searchBooks = async (req, res) => {
       });
     }
 
-    // Fetch approved books
+    /* -------- FETCH BOOKS -------- */
     let books = await Book.find({ status: "approved" })
       .populate("seller", "name storeName")
       .populate("catagorieID", "name keywords")
       .lean();
 
-    // Fuzzy search ranking
+    /* -------- FUZZY SEARCH -------- */
     let ranked = rankBooks(books, q);
 
-    // Apply minRating filter
+    /* ✅ CATEGORY + KEYWORD FILTER */
+    ranked = filterByCategoryAndKeyword(ranked, q, category);
+
+    /* -------- RATING FILTER -------- */
     if (minRating) {
       const minR = parseFloat(minRating);
       ranked = ranked.filter((r) => (r.book.ratings || 0) >= minR);
     }
+
+    /* -------- GENRE FILTER -------- */
     if (genre) {
-      ranked = ranked.filter((r) => r.book.genres.includes(genre));
+      ranked = ranked.filter((r) => r.book.genres?.includes(genre));
     }
 
-    // Apply price range filter
+    /* -------- PRICE FILTER -------- */
     const min = minPrice ? parseFloat(minPrice) : 0;
     const max = maxPrice ? parseFloat(maxPrice) : Infinity;
 
@@ -48,7 +55,7 @@ export const searchBooks = async (req, res) => {
       return price >= min && price <= max;
     });
 
-    // Apply other filters
+    /* -------- SORT FILTERS -------- */
     if (filter === "new") {
       ranked.sort(
         (a, b) => new Date(b.book.createdAt) - new Date(a.book.createdAt)
@@ -61,7 +68,7 @@ export const searchBooks = async (req, res) => {
       ranked.sort((a, b) => (b.book.ratings || 0) - (a.book.ratings || 0));
     }
 
-    // Pagination
+    /* -------- PAGINATION -------- */
     const totalResults = ranked.length;
     const totalPages = Math.ceil(totalResults / limit);
 
@@ -80,6 +87,31 @@ export const searchBooks = async (req, res) => {
     console.error(err);
     res.status(500).json({ message: err.message });
   }
+};
+
+export const filterByCategoryAndKeyword = (ranked, keyword, category) => {
+  const q = keyword?.toLowerCase().trim();
+  const cat = category?.toLowerCase().trim();
+
+  return ranked.filter(({ book }) => {
+    const categoryDoc = book.catagorieID;
+
+    if (!categoryDoc) return false;
+
+    const categoryName = categoryDoc.name?.toLowerCase() || "";
+    const categoryKeywords = categoryDoc.keywords || [];
+
+    /* -------- CATEGORY MATCH -------- */
+    const categoryMatch = cat ? categoryName === cat : true;
+
+    /* -------- KEYWORD MATCH -------- */
+    const keywordMatch = q
+      ? categoryKeywords.some((k) => k.toLowerCase().includes(q)) ||
+        categoryName.includes(q)
+      : true;
+
+    return categoryMatch && keywordMatch;
+  });
 };
 
 export const searchSuggestions = async (req, res) => {

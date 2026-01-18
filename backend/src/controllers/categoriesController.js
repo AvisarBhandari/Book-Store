@@ -1,4 +1,4 @@
-import Categorie from "../models/Categorie.js";
+import Categorie from "../models/Category.js";
 import mongoose from "mongoose";
 
 export async function getAllCategorie(req, res) {
