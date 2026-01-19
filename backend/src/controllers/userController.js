@@ -1,5 +1,6 @@
 import User from "../models/user.js";
 import mongoose from "mongoose";
+import { generateAvatar } from "../services/avatar.service.js";
 
 export async function getAlluser(req, res) {
   try {
@@ -66,6 +67,15 @@ export async function updateUser(req, res) {
   try {
     const { id } = req.params;
     const updates = req.body;
+    if (req.file) {
+      updates.avatarType = "uploaded";
+    } else if (updates.name) {
+      updates.ppImage = await generateAvatar({
+        name: updates.name,
+        model: "user",
+      });
+      updates.avatarType = "generated";
+    }
     const updatedUser = await User.findByIdAndUpdate(id, updates, {
       new: true,
     });
@@ -90,13 +100,21 @@ export const createuser = async (req, res) => {
       return res.status(409).json({ message: "User already exists" });
     }
 
-    const ppImage = req.file ? req.file.path : null;
+    const ppImage = req.file
+      ? req.file.path
+      : await generateAvatar({ name, model: "user" });
+
+    let avatarType = "generated";
+    if (req.file) {
+      avatarType = "uploaded";
+    }
 
     const newuser = await User.create({
       name,
       email,
       password,
       ppImage,
+      avatarType,
     });
 
     res.status(201).json({
@@ -106,6 +124,7 @@ export const createuser = async (req, res) => {
         name: newuser.name,
         email: newuser.email,
         ppImage: newuser.ppImage,
+        avatarType: newuser.avatarType,
       },
     });
   } catch (error) {

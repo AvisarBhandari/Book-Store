@@ -14,10 +14,15 @@ const sellerSchema = new mongoose.Schema(
       required: true,
     },
     ppImage: String,
+    avatarType: {
+      type: String,
+      enum: ["uploaded", "generated"],
+      default: "generated",
+    },
     role: { type: String, default: "seller" },
     bookList: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // hash password
@@ -42,7 +47,7 @@ sellerSchema.methods.generateToken = function () {
       role: "seller",
     },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN }
+    { expiresIn: process.env.JWT_EXPIRES_IN },
   );
 };
 
