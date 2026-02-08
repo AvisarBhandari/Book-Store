@@ -15,25 +15,35 @@ import SearchPage from "./pages/SearchPage.jsx";
 import BestSelling from "./pages/bestSellingPages.jsx";
 import Dealspages from "./pages/Dealspages.jsx";
 import CartPage from "./pages/cartPage.jsx";
+import LoginPages from "./pages/auth-User/loginPages.jsx";
+import RegisterPages from "./pages/auth-User/RegisterPages.jsx";
 
 const App = () => {
   return (
     <div data-theme="light">
       <Routes>
+        {/* main pages */}
         <Route path="/" element={<HomePages />} />
         <Route path="/about" element={<AboutPages />} />
         <Route path="/browse" element={<BrowsePags />} />
-        <Route path="/browse/:id" element={<BrowsePags />} />
-        <Route path="/book/:id" element={<BookPage />} />
+        <Route path="/categories" element={<Categories />} />
+        <Route path="/best-selling" element={<BestSelling />} />
+        <Route path="/deals" element={<Dealspages />} />
+        {/* policies */}
         <Route path="/seller-terms" element={<SellerTerms />} />
         <Route path="/terms-of-service" element={<TermsofService />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/categories" element={<Categories />} />
-        <Route path="/seller-login" element={<SellerLogin />} />
+        {/* dynamic pages */}
+        <Route path="/browse/:id" element={<BrowsePags />} />
+        <Route path="/book/:id" element={<BookPage />} />
         <Route path="/search" element={<SearchPage />} />
-        <Route path="/best-selling" element={<BestSelling />} />
-        <Route path="/deals" element={<Dealspages />} />
         <Route path="/cart" element={<CartPage />} />
+        {/* Auth */}
+        <Route path="/seller-login" element={<SellerLogin />} />
+        {/* User Auth */}
+        <Route path="/login" element={<LoginPages />} />
+        <Route path="/register" element={<RegisterPages />} />
+        {/* 404 Page */}
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </div>

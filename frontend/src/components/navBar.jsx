@@ -181,7 +181,9 @@ const NavBar = () => {
             </div>
           </div>
           {/* Auth */}
-          <button className="btn btn-outline btn-sm w-20">Login</button>
+          <button className="btn btn-outline btn-sm w-20">
+            <NavLink to="/login">Login</NavLink>
+          </button>
           <button className="btn btn-neutral btn-sm w-20 hover:bg-white hover:text-black">
             Register
           </button>
