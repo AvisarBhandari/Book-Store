@@ -63,7 +63,7 @@ export const getUser = async (req, res) => {
     });
   }
 };
-export async function getBook(req, res) {
+export async function getPurchasedBook(req, res) {
   try {
     const { id } = req.params;
     const user = await User.findById(id).populate("purchasedBooks");
@@ -166,11 +166,10 @@ export const loginuser = async (req, res) => {
     }
 
     const token = user.generateToken();
-
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: false,
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -180,5 +179,59 @@ export const loginuser = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const getBookmarks = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const user = await User.findById(userId).populate("bookmarks");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json({
+      message: "Bookmarks fetched successfully",
+      bookmarks: user.bookmarks,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// ADD or REMOVE a bookmark
+export const toggleBookmark = async (req, res) => {
+  try {
+    const { userId, bookId } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Check if book is already bookmarked
+    const index = user.bookmarks.findIndex((id) => id.toString() === bookId);
+
+    let action;
+    if (index === -1) {
+      // Not bookmarked, add it
+      user.bookmarks.push(bookId);
+      action = "added";
+    } else {
+      // Already bookmarked, remove it
+      user.bookmarks.splice(index, 1);
+      action = "removed";
+    }
+
+    await user.save();
+
+    // Optionally, populate bookmarks to return full book data
+    const updatedUser = await User.findById(userId).populate("bookmarks");
+
+    res.json({
+      message: `Bookmark ${action} successfully`,
+      bookmarks: updatedUser.bookmarks,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
   }
 };

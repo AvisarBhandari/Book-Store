@@ -16,13 +16,13 @@ router.get(
   "/seller/orders",
   protect,
   allowRoles("seller", "admin"),
-  getSellerOrders
+  getSellerOrders,
 );
 router.get(
   "/:id",
   protect,
   allowRoles("user", "seller", "admin"),
-  getOrderById
+  getOrderById,
 );
 router.get("/", protect, allowRoles("admin"), getAllOrders);
 

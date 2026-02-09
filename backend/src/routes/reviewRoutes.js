@@ -8,12 +8,13 @@ import { protect, allowRoles } from "../middlewares/auth.js";
 
 const router = express.Router();
 router.post(
-  "/reviews",
+  "/set-review",
   protect,
-  allowRoles("user,admin,seller"),
-  createOrUpdateReview
+  allowRoles("user", "admin", "seller"),
+  createOrUpdateReview,
 );
-router.get("/books/:bookId/reviews", getBookReviews);
-router.delete("/reviews/:id", deleteReview);
+
+router.get("/:bookId", getBookReviews);
+router.delete("/:id", deleteReview);
 
 export default router;

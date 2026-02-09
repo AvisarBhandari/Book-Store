@@ -2,18 +2,20 @@ import express from "express";
 import {
   getAlluser,
   getUser,
-  getBook,
+  getPurchasedBook,
   createuser,
   loginuser,
   updateUser,
   deleteuser,
+  getBookmarks,
+  toggleBookmark,
 } from "../controllers/userController.js";
 import upload from "../middlewares/ppUpload.js";
 import { protect, allowRoles } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-router.get("/books/:id", getBook);
+router.get("/books/:id", getPurchasedBook);
 router.get("/profile", protect, allowRoles("user"), (req, res) => {
   res.json({
     role: req.role,
@@ -40,5 +42,10 @@ router.get("/:identifier", getUser);
 router.put("/update/:id", upload.single("ppuser"), updateUser);
 router.post("/create", upload.single("ppuser"), createuser);
 router.post("/login", loginuser);
+// Get bookmarks for a user
+router.get("/:userId/bookmarks", getBookmarks);
+
+// Add/remove bookmark
+router.post("/bookmark", toggleBookmark);
 
 export default router;

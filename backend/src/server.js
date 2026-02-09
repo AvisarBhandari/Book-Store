@@ -12,6 +12,8 @@ import rateLimiter from "./middlewares/rateLimiter.js";
 import categorieRoutes from "./routes/categorieRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import search from "./routes/searchRoutes.js";
+import reviewRoute from "./routes/reviewRoutes.js";
+import esewa from "./routes/payment.js";
 
 dotenv.config();
 const app = express();
@@ -29,7 +31,7 @@ app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
-  })
+  }),
 );
 
 app.use("/uploads", express.static(path.join(path.resolve(), "uploads")));
@@ -42,6 +44,8 @@ app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/categorie", categorieRoutes);
 app.use("/api/search", search);
+app.use("/api/review", reviewRoute);
+app.use("/api/payment", esewa);
 
 // Connect DB and start server
 connectDB().then(() => {
