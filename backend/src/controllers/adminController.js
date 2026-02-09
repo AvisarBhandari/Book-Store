@@ -18,7 +18,7 @@ export const getAdmin = async (req, res) => {
     }
 
     const admin = await Admin.findById(id).select(
-      "name email ppImage createdAt updatedAt"
+      "name email ppImage createdAt updatedAt",
     );
 
     if (!admin) {
@@ -74,6 +74,21 @@ export const createadmin = async (req, res) => {
       message: "Server error",
       error: error.message,
     });
+  }
+};
+export const updateadmin = async (req, res) => {
+  try {
+    const adminId = req.user._id;
+    const updates = req.body;
+    const updatedadmin = await Admin.findByIdAndUpdate(adminId, updates, {
+      new: true,
+    });
+    res.status(200).json({
+      message: "admin updated successfully",
+      admin: updatedadmin,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 

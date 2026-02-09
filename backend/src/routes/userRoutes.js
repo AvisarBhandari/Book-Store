@@ -6,6 +6,7 @@ import {
   createuser,
   loginuser,
   updateUser,
+  deleteuser,
 } from "../controllers/userController.js";
 import upload from "../middlewares/ppUpload.js";
 import { protect, allowRoles } from "../middlewares/auth.js";
@@ -28,12 +29,12 @@ router.post("/logout", (req, res) => {
   });
   res.status(200).json({ message: "Logged out successfully" });
 });
-
+router.delete("/delete/:id", deleteuser);
 router.get(
   "/",
   // protect,
   // allowRoles("admin"),
-  getAlluser
+  getAlluser,
 );
 router.get("/:identifier", getUser);
 router.put("/update/:id", upload.single("ppuser"), updateUser);

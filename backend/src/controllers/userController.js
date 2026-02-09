@@ -1,6 +1,6 @@
 import User from "../models/user.js";
 import mongoose from "mongoose";
-import { generateAvatar } from "../services/avatar.service.js";
+import { resolveAvatar } from "../services/avatar.resolver.js";
 
 export async function getAlluser(req, res) {
   try {
@@ -10,7 +10,18 @@ export async function getAlluser(req, res) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 }
-
+export async function deleteuser(req, res) {
+  try {
+    const { id } = req.params;
+    const deleteduser = await User.findByIdAndDelete(id);
+    if (!deleteduser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+}
 export const getUser = async (req, res) => {
   try {
     const { identifier } = req.params;
@@ -67,15 +78,16 @@ export async function updateUser(req, res) {
   try {
     const { id } = req.params;
     const updates = req.body;
-    if (req.file) {
-      updates.avatarType = "uploaded";
-    } else if (updates.name) {
-      updates.ppImage = await generateAvatar({
-        name: updates.name,
-        model: "user",
-      });
-      updates.avatarType = "generated";
-    }
+    const avatar = await resolveAvatar({
+      doc: User,
+      file: req.file,
+      name: updates.name,
+      model: "user",
+    });
+
+    Object.assign(user, updates, avatar);
+    await user.save();
+
     const updatedUser = await User.findByIdAndUpdate(id, updates, {
       new: true,
     });
@@ -100,21 +112,21 @@ export const createuser = async (req, res) => {
       return res.status(409).json({ message: "User already exists" });
     }
 
-    const ppImage = req.file
-      ? req.file.path
-      : await generateAvatar({ name, model: "user" });
+    const ppImage = req.file ? req.file.path : null;
 
-    let avatarType = "generated";
-    if (req.file) {
-      avatarType = "uploaded";
-    }
+    const avatar = await resolveAvatar({
+      doc: null,
+      file: req.file,
+      name,
+      model: "user",
+    });
 
     const newuser = await User.create({
       name,
       email,
       password,
       ppImage,
-      avatarType,
+      ...avatar,
     });
 
     res.status(201).json({

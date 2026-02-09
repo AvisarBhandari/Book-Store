@@ -52,7 +52,21 @@ export const createSeller = async (req, res) => {
     });
   }
 };
-
+export async function updateSeller(req, res) {
+  try {
+    const sellerId = req.user._id;
+    const updates = req.body;
+    const updatedSeller = await Seller.findByIdAndUpdate(sellerId, updates, {
+      new: true,
+    });
+    res.status(200).json({
+      message: "Seller updated successfully",
+      seller: updatedSeller,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+}
 export const loginSeller = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -88,21 +102,7 @@ export const loginSeller = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-export async function updateSeller(req, res) {
-  try {
-    const sellerId = req.user._id;
-    const updates = req.body;
-    const updatedSeller = await Seller.findByIdAndUpdate(sellerId, updates, {
-      new: true,
-    });
-    res.status(200).json({
-      message: "Seller updated successfully",
-      seller: updatedSeller,
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-}
+
 export async function deleteSeller(req, res) {
   try {
     const SellerId = req.user._id;

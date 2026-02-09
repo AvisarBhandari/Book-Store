@@ -1,18 +1,20 @@
 import { createCanvas } from "canvas";
 import fs from "fs";
 import path from "path";
-import { getInitials } from "../utils/initials.js";
+import { getInitials } from "../utils/initial.js";
 
-/**
- * Generates an avatar image and returns file path
- * @param {Object} options
- * @param {String} options.name - Person name
- * @param {String} options.model - user | seller | admin | author | etc
- * @param {Number} options.size - Image size (default 256)
- */
-export const generateAvatar = async ({ name, model = "user", size = 256 }) => {
+export const generateAvatar = async ({
+  name,
+  model = "user",
+  size = 256,
+  outputDir,
+}) => {
   if (!name) {
     throw new Error("Name is required to generate avatar");
+  }
+
+  if (!outputDir) {
+    throw new Error("outputDir is required");
   }
 
   const initials = getInitials(name);
@@ -42,14 +44,11 @@ export const generateAvatar = async ({ name, model = "user", size = 256 }) => {
   ctx.textBaseline = "middle";
   ctx.fillText(initials, size / 2, size / 2);
 
-  // Storage path
-  const uploadDir = path.join("uploads", "picture", model);
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-  }
+  // Ensure directory exists
+  fs.mkdirSync(outputDir, { recursive: true });
 
   const filename = `avatar-${Date.now()}.png`;
-  const filePath = path.join(uploadDir, filename);
+  const filePath = path.join(outputDir, filename);
 
   fs.writeFileSync(filePath, canvas.toBuffer("image/png"));
 
