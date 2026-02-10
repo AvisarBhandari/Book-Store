@@ -48,7 +48,6 @@ export const createBook = async (req, res) => {
       !author ||
       !description ||
       !price ||
-      !seller ||
       !category ||
       !categoryID
     ) {
@@ -73,6 +72,17 @@ export const createBook = async (req, res) => {
       });
     }
 
+    // Normalize genres: accept both comma‑separated string and array
+    let normalizedGenres = [];
+    if (Array.isArray(genres)) {
+      normalizedGenres = genres;
+    } else if (typeof genres === "string" && genres.trim().length > 0) {
+      normalizedGenres = genres
+        .split(",")
+        .map((g) => g.trim())
+        .filter(Boolean);
+    }
+
     // Create book document
     const book = new Book({
       title,
@@ -80,7 +90,7 @@ export const createBook = async (req, res) => {
       description,
       price: Number(price),
       discountPercentage: discountPercentage ? Number(discountPercentage) : 0,
-      genres: genres ? genres.split(",") : [],
+      genres: normalizedGenres,
       seller,
       category,
       categoryID,
@@ -134,7 +144,20 @@ export const updateBook = async (req, res) => {
     if (price) book.price = Number(price);
     if (discountPercentage)
       book.discountPercentage = Number(discountPercentage);
-    if (genres) book.genres = genres.split(",");
+
+    // Normalize genres on update: allow array or string, ignore if undefined
+    if (genres !== undefined) {
+      if (Array.isArray(genres)) {
+        book.genres = genres;
+      } else if (typeof genres === "string" && genres.trim().length > 0) {
+        book.genres = genres
+          .split(",")
+          .map((g) => g.trim())
+          .filter(Boolean);
+      } else {
+        book.genres = [];
+      }
+    }
     if (seller) book.seller = seller;
 
     // Accept both category/category naming, and preserve existing when not provided

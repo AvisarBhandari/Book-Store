@@ -1,61 +1,42 @@
 import Admin from "../models/admin.js";
 import Book from "../models/book.js";
 import Order from "../models/order.js";
+import Seller from "../models/seller.js";
 import User from "../models/user.js";
+
 export async function getAlladmin(req, res) {
   try {
-    const admins = await Admin.find();
+    const admins = await Admin.find().lean();
     res.status(200).json(admins);
   } catch (error) {
-    res.status(500).json({ message: "Server Error", error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 }
 
-export const getAdmin = async (req, res) => {
+export async function getAdmin(req, res) {
   try {
-    const { id } = req.params;
-
-    if (!id) {
-      return res.status(400).json({ message: "Admin ID is required" });
-    }
-
-    const admin = await Admin.findById(id).select(
-      "name email ppImage createdAt updatedAt",
-    );
-
-    if (!admin) {
-      return res.status(404).json({ message: "Admin not found" });
-    }
-
-    res.status(200).json({
-      success: true,
-      admin,
-    });
+    const admin = await Admin.findById(req.params.id).lean();
+    if (!admin) return res.status(404).json({ message: "Admin not found" });
+    res.status(200).json(admin);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-      error: error.message,
-    });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
-};
+}
 
 export const createadmin = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Required fields missing" });
     }
 
-    const existingadmin = await Admin.findOne({ email });
-    if (existingadmin) {
-      return res.status(409).json({ message: "admin already exists" });
-    }
+    const existingAdmin = await Admin.findOne({ email });
+    if (existingAdmin)
+      return res.status(409).json({ message: "Admin already exists" });
 
     const ppImage = req.file ? req.file.path : null;
 
-    const newadmin = await Admin.create({
+    const newAdmin = await Admin.create({
       name,
       email,
       password,
@@ -63,31 +44,13 @@ export const createadmin = async (req, res) => {
     });
 
     res.status(201).json({
-      message: "admin created successfully",
+      message: "Admin created successfully",
       admin: {
-        id: newadmin._id,
-        name: newadmin.name,
-        email: newadmin.email,
-        ppImage: newadmin.ppImage,
+        id: newAdmin._id,
+        name: newAdmin.name,
+        email: newAdmin.email,
+        ppImage: newAdmin.ppImage,
       },
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
-  }
-};
-export const updateadmin = async (req, res) => {
-  try {
-    const adminId = req.user._id;
-    const updates = req.body;
-    const updatedadmin = await Admin.findByIdAndUpdate(adminId, updates, {
-      new: true,
-    });
-    res.status(200).json({
-      message: "admin updated successfully",
-      admin: updatedadmin,
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
@@ -97,43 +60,30 @@ export const updateadmin = async (req, res) => {
 export const loginadmin = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    if (!email || !password) {
+    if (!email || !password)
       return res.status(400).json({ message: "Email and password required" });
-    }
 
     const admin = await Admin.findOne({ email });
-    if (!admin) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
+    if (!admin) return res.status(401).json({ message: "Invalid credentials" });
 
     const isMatch = await admin.comparePassword(password);
-    if (!isMatch) {
+    if (!isMatch)
       return res.status(401).json({ message: "Invalid credentials" });
-    }
 
     const token = admin.generateToken();
-
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: false,
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({
-      message: "Login successful",
-      role: "admin",
-    });
+    res.status(200).json({ message: "Login successful", role: "admin" });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
-/**
- * GET /api/admin/dashboard
- * Admin dashboard overview
- */
 export const getAdminDashboardOverview = async (req, res) => {
   try {
     // Start of today
@@ -223,6 +173,7 @@ export const getTopPerformingBooks = async (req, res) => {
         },
       },
       { $unwind: "$book" },
+      { $project: { _id: 0, title: "$book.title", downloads: 1 } },
     ]);
 
     res.status(200).json({ success: true, topBooks });
