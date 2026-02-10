@@ -1,9 +1,9 @@
-import React from "react";
 import logo from "../assets/Logo.png";
 import { NavLink, useNavigate } from "react-router-dom";
 import SearchBar from "./SearchBar";
 import { FiChevronDown, FiShoppingCart } from "react-icons/fi";
 import { useCart } from "../context/CartContext";
+import React, { useEffect, useState } from "react";
 
 const formatPrice = (v) => Number(v).toFixed(2);
 
@@ -18,6 +18,43 @@ const navLinkClass = ({ isActive }) =>
 const NavBar = () => {
   const navigate = useNavigate();
   const { cart, removeFromCart, subtotal } = useCart();
+
+  const [user, setUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch("http://localhost:5001/api/user/profile", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!res.ok) throw new Error("Not logged in");
+
+        const data = await res.json();
+        setUser(data.user);
+      } catch (err) {
+        setUser(null);
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+  const getAvatar = () => {
+    if (!user) return "";
+
+    if (user.ppImage) {
+      return `http://localhost:5001/${user.ppImage}`;
+    }
+
+    // fallback: initials avatar
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      user.name,
+    )}&background=0D8ABC&color=fff`;
+  };
 
   return (
     <div className="bg-base-100 shadow-sm sticky z-50 ">
@@ -158,35 +195,85 @@ const NavBar = () => {
           </div>
           <div className=" hover:animate-bounce ">
             <div className="group">
-              <svg
-                width="20"
-                height="24"
-                viewBox="0 0 30 34"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M0 10V28.3333C0 32.0017 2.99 33.3333 5 33.3333H30V30H5.02C4.25 29.98 3.33333 29.6767 3.33333 28.3333C3.33333 26.99 4.25 26.6867 5.02 26.6667H30V3.33333C30 1.495 28.505 0 26.6667 0H5C2.99 0 0 1.33167 0 5V10ZM5 3.33333H26.6667V23.3333H3.33333V5C3.33333 3.65667 4.25 3.35333 5 3.33333Z"
-                  fill="#373434"
-                  fill-opacity="0.81"
-                  className=""
-                />
-                <path
-                  d="M14.9951 20L20.5784 14.5184C20.9226 14.1873 21.1965 13.7901 21.3836 13.3506C21.5707 12.9112 21.6671 12.4385 21.6671 11.9609C21.6671 11.4832 21.5707 11.0105 21.3836 10.5711C21.1965 10.1316 20.9226 9.73443 20.5784 9.40335C19.8844 8.71836 18.9485 8.33428 17.9734 8.33428C16.9983 8.33428 16.0624 8.71836 15.3684 9.40335L14.9951 9.76669L14.6217 9.40169C13.928 8.7168 12.9924 8.33276 12.0176 8.33276C11.0427 8.33276 10.1071 8.7168 9.41339 9.40169C9.06914 9.73277 8.79528 10.1299 8.6082 10.5694C8.42113 11.0089 8.32471 11.4816 8.32471 11.9592C8.32471 12.4368 8.42113 12.9095 8.6082 13.349C8.79528 13.7884 9.06914 14.1856 9.41339 14.5167L14.9951 20Z"
-                  fill="#373434"
-                  fill-opacity="0.81"
-                  className="transition-colors duration-300 group-hover:fill-[#FF0004]"
-                />
-              </svg>
+              <NavLink to="/bookmark">
+                <svg
+                  width="20"
+                  height="24"
+                  viewBox="0 0 30 34"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M0 10V28.3333C0 32.0017 2.99 33.3333 5 33.3333H30V30H5.02C4.25 29.98 3.33333 29.6767 3.33333 28.3333C3.33333 26.99 4.25 26.6867 5.02 26.6667H30V3.33333C30 1.495 28.505 0 26.6667 0H5C2.99 0 0 1.33167 0 5V10ZM5 3.33333H26.6667V23.3333H3.33333V5C3.33333 3.65667 4.25 3.35333 5 3.33333Z"
+                    fill="#373434"
+                    fill-opacity="0.81"
+                    className=""
+                  />
+                  <path
+                    d="M14.9951 20L20.5784 14.5184C20.9226 14.1873 21.1965 13.7901 21.3836 13.3506C21.5707 12.9112 21.6671 12.4385 21.6671 11.9609C21.6671 11.4832 21.5707 11.0105 21.3836 10.5711C21.1965 10.1316 20.9226 9.73443 20.5784 9.40335C19.8844 8.71836 18.9485 8.33428 17.9734 8.33428C16.9983 8.33428 16.0624 8.71836 15.3684 9.40335L14.9951 9.76669L14.6217 9.40169C13.928 8.7168 12.9924 8.33276 12.0176 8.33276C11.0427 8.33276 10.1071 8.7168 9.41339 9.40169C9.06914 9.73277 8.79528 10.1299 8.6082 10.5694C8.42113 11.0089 8.32471 11.4816 8.32471 11.9592C8.32471 12.4368 8.42113 12.9095 8.6082 13.349C8.79528 13.7884 9.06914 14.1856 9.41339 14.5167L14.9951 20Z"
+                    fill="#373434"
+                    fill-opacity="0.81"
+                    className="transition-colors duration-300 group-hover:fill-[#FF0004]"
+                  />
+                </svg>
+              </NavLink>
             </div>
           </div>
           {/* Auth */}
-          <button className="btn btn-outline btn-sm w-20">
-            <NavLink to="/login">Login</NavLink>
-          </button>
-          <button className="btn btn-neutral btn-sm w-20 hover:bg-white hover:text-black">
-            Register
-          </button>
+          <div>
+            {loadingUser ? (
+              // Skeleton while loading
+              <div className="flex gap-2 items-center">
+                <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            ) : user ? (
+              // User is logged in
+              <div className="dropdown dropdown-end">
+                <label tabIndex={0} className="cursor-pointer">
+                  <img
+                    src={getAvatar()}
+                    alt="avatar"
+                    className="w-9 h-9 rounded-full border"
+                  />
+                </label>
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40"
+                >
+                  <li>
+                    <NavLink to="/profile">Profile</NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/orders">Orders</NavLink>
+                  </li>
+                  <li>
+                    <button
+                      onClick={async () => {
+                        await fetch("http://localhost:5001/api/user/logout", {
+                          method: "POST",
+                          credentials: "include",
+                        });
+                        setUser(null);
+                      }}
+                    >
+                      Logout
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            ) : (
+              // Not logged in
+              <div className="flex gap-2">
+                <NavLink className="btn btn-outline btn-sm w-20" to="/login">
+                  Login
+                </NavLink>
+                <NavLink className="btn btn-neutral btn-sm w-20" to="/register">
+                  Register
+                </NavLink>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

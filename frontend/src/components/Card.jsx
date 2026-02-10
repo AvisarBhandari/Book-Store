@@ -1,5 +1,6 @@
 import React from "react";
 import { useCart, formatPrice } from "../context/CartContext";
+import { handleEsewaPayment, confirmPurchase } from "../utils/paymentUtil";
 
 const Cart = () => {
   const { cart, removeFromCart, subtotal } = useCart();
@@ -118,7 +119,12 @@ const Cart = () => {
                 <span>Rs {formatPrice(subtotal)}</span>
               </div>
 
-              <button className="w-full btn btn-neutral rounded-none hover:bg-white hover:text-black py-3 font-semibold text-white  hover:border-black  transition">
+              <button
+                onClick={() =>
+                  handleEsewaPayment({ _id: "bookId", finalPrice: subtotal })
+                }
+                className="w-full btn btn-neutral rounded-none hover:bg-white hover:text-black py-3 font-semibold text-white  hover:border-black  transition"
+              >
                 Proceed to Checkout
               </button>
             </div>

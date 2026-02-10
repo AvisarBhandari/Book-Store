@@ -17,7 +17,16 @@ import Dealspages from "./pages/Dealspages.jsx";
 import CartPage from "./pages/cartPage.jsx";
 import LoginPages from "./pages/auth-User/loginPages.jsx";
 import RegisterPages from "./pages/auth-User/RegisterPages.jsx";
-
+import BookMarkPages from "./pages/BookMarkPages.jsx";
+import AutherBookPages from "./pages/AutherBookpages.jsx";
+import SellerIndexPages from "./pages/seller/SellerindexPages.jsx";
+import SellrBookManagerPages from "./pages/seller/sellerbookManagementPages.jsx";
+import SellerUserPages from "./pages/seller/sellerUserPages.jsx";
+import SellerSalesPages from "./pages/seller/SellerSalesPages.jsx";
+import SellerSettingsPages from "./pages/seller/sellerSettingsPages.jsx";
+import SellerDashboardLayout from "./layouts/SellerDashboardLayout.jsx";
+import SellerRegisterpage from "./pages/SellerRegisterPage.jsx";
+import AdminIndexPages from "./pages/admin/AdminindexPages.jsx";
 const App = () => {
   return (
     <div data-theme="light">
@@ -27,12 +36,23 @@ const App = () => {
         <Route path="/about" element={<AboutPages />} />
         <Route path="/browse" element={<BrowsePags />} />
         <Route path="/categories" element={<Categories />} />
+        <Route path="/bookmark" element={<BookMarkPages />} />
         <Route path="/best-selling" element={<BestSelling />} />
+        <Route path="/author/:id" element={<AutherBookPages />} />
         <Route path="/deals" element={<Dealspages />} />
         {/* policies */}
         <Route path="/seller-terms" element={<SellerTerms />} />
         <Route path="/terms-of-service" element={<TermsofService />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        {/* seller dashboard */}
+        <Route path="/seller" element={<SellerDashboardLayout />}>
+          <Route index element={<SellerIndexPages />} />
+          <Route path="book-management" element={<SellrBookManagerPages />} />
+          <Route path="user-management" element={<SellerUserPages />} />
+          <Route path="sales" element={<SellerSalesPages />} />
+          <Route path="settings" element={<SellerSettingsPages />} />
+        </Route>
+
         {/* dynamic pages */}
         <Route path="/browse/:id" element={<BrowsePags />} />
         <Route path="/book/:id" element={<BookPage />} />
@@ -40,6 +60,10 @@ const App = () => {
         <Route path="/cart" element={<CartPage />} />
         {/* Auth */}
         <Route path="/seller-login" element={<SellerLogin />} />
+        <Route path="/seller-register" element={<SellerRegisterpage />} />
+
+        {/* Admin Dashboard */}
+        <Route path="/admin" element={<AdminIndexPages />} />
         {/* User Auth */}
         <Route path="/login" element={<LoginPages />} />
         <Route path="/register" element={<RegisterPages />} />

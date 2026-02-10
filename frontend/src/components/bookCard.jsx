@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { FiHeart, FiShoppingCart } from "react-icons/fi";
 import { useCart } from "../context/CartContext";
+import axios from "axios";
+import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export function formatPrice(value) {
   return Number(value).toFixed(2);
@@ -15,26 +18,27 @@ function BookCardSkeleton() {
         <div className="h-3 bg-gray-200 rounded mb-2 w-full" />
         <div className="h-3 bg-gray-200 rounded mb-4 w-2/3" />
         <div className="h-4 bg-gray-200 rounded w-1/3 mb-4" />
-        <div className="mt-auto flex gap-3">
-          <div className="h-[38px] w-[120px] bg-gray-200 rounded-xl" />
-          <div className="h-[38px] w-[38px] bg-gray-200 rounded-full" />
-        </div>
       </div>
     </div>
   );
 }
 
-export default function BookCard({ bookId, navigate }) {
+export default function BookCard({ bookId }) {
+  const navigate = useNavigate();
+
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [user, setUser] = useState(null);
 
   const { addToCart, isInCart } = useCart();
 
+  /* ---------------- Fetch book ---------------- */
   useEffect(() => {
     let mounted = true;
 
-    async function fetchBook() {
+    const fetchBook = async () => {
       try {
         const res = await fetch(`http://localhost:5001/api/book/${bookId}`);
         const data = await res.json();
@@ -42,47 +46,103 @@ export default function BookCard({ bookId, navigate }) {
           setBook(data);
           setLoading(false);
         }
-      } catch (err) {
-        console.error("Failed to fetch book:", err);
+      } catch {
         setLoading(false);
       }
-    }
+    };
 
     fetchBook();
-
     return () => (mounted = false);
   }, [bookId]);
 
+  /* ---------------- Fetch user ---------------- */
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get("http://localhost:5001/api/user/profile", {
+          withCredentials: true,
+        });
+
+        setUser(res.data.user);
+
+        if (res.data.user.bookmarks.includes(bookId)) {
+          setBookmarked(true);
+        }
+      } catch {
+        setUser(null);
+      }
+    };
+
+    fetchProfile();
+  }, [bookId]);
+
   if (loading) return <BookCardSkeleton />;
-  if (!book) return <p className="text-gray-400">Book not found</p>;
+  if (!book) return null;
 
   const inCart = isInCart(book._id);
 
-  const handleAddToCart = () => {
+  /* ---------------- Actions ---------------- */
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
     if (adding) return;
-    setAdding(true);
 
+    setAdding(true);
     addToCart(book);
 
-    setTimeout(() => setAdding(false), 1000);
+    setTimeout(() => setAdding(false), 800);
   };
 
+  const handleBookmark = async (e) => {
+    e.stopPropagation();
+
+    if (!user) {
+      toast.error("Please login to bookmark books");
+      return;
+    }
+
+    setBookmarked((prev) => !prev);
+
+    try {
+      const res = await axios.post(
+        "http://localhost:5001/api/user/bookmark",
+        { bookId },
+        { withCredentials: true },
+      );
+
+      const exists = res.data.bookmarks.some(
+        (b) => b === bookId || b._id === bookId,
+      );
+
+      setBookmarked(exists);
+
+      toast.success(exists ? "Book bookmarked ❤️" : "Bookmark removed");
+    } catch {
+      setBookmarked((prev) => !prev);
+      toast.error("Failed to update bookmark");
+    }
+  };
+
+  /* ---------------- Render ---------------- */
   return (
-    <div className="group bg-white rounded-2xl shadow-sm p-4 flex gap-4 h-full transition hover:shadow-md">
+    <div
+      onClick={() => navigate(`/book/${book._id}`)}
+      className="
+        cursor-pointer
+        bg-white rounded-2xl shadow-sm
+        p-4 flex gap-4 h-full
+        transition hover:shadow-md
+      "
+    >
       {/* Cover */}
       <img
         src={`http://localhost:5001/${book.coverImage}`}
         alt={book.title}
-        loading="lazy"
-        decoding="async"
         className="w-[120px] h-[180px] object-cover rounded-xl"
       />
 
       {/* Content */}
       <div className="flex flex-col flex-1">
-        <h3 className="text-sm font-semibold leading-snug line-clamp-2">
-          {book.title}
-        </h3>
+        <h3 className="text-sm font-semibold line-clamp-2">{book.title}</h3>
 
         <p className="text-xs text-gray-500 mt-1 line-clamp-2">
           {book.description}
@@ -90,7 +150,7 @@ export default function BookCard({ bookId, navigate }) {
 
         {/* Price */}
         <div className="flex items-center gap-2 mt-3">
-          <span className="text-sm font-semibold">
+          <span className="font-semibold text-sm">
             Rs {formatPrice(book.finalPrice)}
           </span>
 
@@ -99,38 +159,6 @@ export default function BookCard({ bookId, navigate }) {
               Rs {formatPrice(book.price)}
             </span>
           )}
-
-          {book.discountPercentage > 0 && (
-            <span className="text-xs text-green-600 font-semibold">
-              {book.discountPercentage}% off
-            </span>
-          )}
-        </div>
-
-        {/* ⭐ Rating */}
-        <div className="flex items-center gap-2 pt-2">
-          <div className="rating rating-sm">
-            {[1, 2, 3, 4, 5].map((star) => {
-              const numericRating = book.ratings
-                ? Math.round(Number(book.ratings))
-                : 0;
-              return (
-                <input
-                  key={star}
-                  type="radio"
-                  name={`rating-${book._id}`}
-                  className="mask mask-star-2 bg-orange-400"
-                  checked={star <= numericRating}
-                  readOnly
-                  tabIndex={-1}
-                />
-              );
-            })}
-          </div>
-
-          <span className="text-xs text-gray-500">
-            ({book.reviewCount ?? 0})
-          </span>
         </div>
 
         {/* Actions */}
@@ -138,27 +166,30 @@ export default function BookCard({ bookId, navigate }) {
           {!inCart ? (
             <button
               onClick={handleAddToCart}
-              disabled={adding}
-              className={`flex items-center gap-2 bg-[#FFD84D] px-4 h-[38px]
-                 rounded-xl text-sm font-medium
-                 hover:scale-105 active:scale-95
-                 transition-all duration-200
-                 ${adding ? "opacity-50 cursor-not-allowed" : ""}`}
+              className="bg-[#FFD84D] px-4 h-[38px] rounded-xl text-sm font-medium"
             >
-              <FiShoppingCart className="animate-bounce" />
-              {adding ? "Adding... " : "Add to basket"}
+              <FiShoppingCart className="inline mr-2" />
+              Add to basket
             </button>
           ) : (
             <button
-              onClick={() => navigate("/cart")}
-              className="btn btn-neutral btn-sm w-100 "
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate("/cart");
+              }}
+              className="btn btn-neutral btn-sm"
             >
-              Added cart
+              Go to cart
             </button>
           )}
 
-          <button className="h-[38px] w-[38px] rounded-full border flex items-center justify-center text-gray-500 hover:text-red-500 transition">
-            <FiHeart />
+          <button
+            onClick={handleBookmark}
+            className={`h-[38px] w-[38px] rounded-full border flex items-center justify-center
+              ${bookmarked ? "text-red-500" : "text-gray-500 hover:text-red-500"}
+            `}
+          >
+            <FiHeart fill={bookmarked ? "red" : "none"} />
           </button>
         </div>
       </div>
