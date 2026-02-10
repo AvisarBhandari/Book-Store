@@ -15,12 +15,18 @@ export const protect = async (req, res, next) => {
 
     let account;
 
-    if (decoded.role === "admin") {
-      account = await Admin.findById(decoded.id).select("-password");
-    } else if (decoded.role === "seller") {
-      account = await Seller.findById(decoded.id).select("-password");
-    } else if (decoded.role === "user") {
-      account = await User.findById(decoded.id).select("-password");
+    switch (decoded.role) {
+      case "admin":
+        account = await Admin.findById(decoded.id).select("-password");
+        break;
+      case "seller":
+        account = await Seller.findById(decoded.id).select("-password");
+        break;
+      case "user":
+        account = await User.findById(decoded.id).select("-password");
+        break;
+      default:
+        return res.status(401).json({ message: "Invalid role" });
     }
 
     if (!account) {
@@ -29,12 +35,14 @@ export const protect = async (req, res, next) => {
 
     req.user = account;
     req.role = decoded.role;
-
     next();
-  } catch (error) {
+  } catch (err) {
+    console.error("protect middleware error:", err);
     res.status(401).json({ message: "Unauthorized" });
   }
 };
+
+// Role-based access control
 export const allowRoles = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.role)) {

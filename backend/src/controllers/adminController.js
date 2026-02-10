@@ -1,5 +1,7 @@
 import Admin from "../models/admin.js";
-
+import Book from "../models/book.js";
+import Order from "../models/order.js";
+import User from "../models/user.js";
 export async function getAlladmin(req, res) {
   try {
     const admins = await Admin.find();
@@ -125,5 +127,109 @@ export const loginadmin = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/dashboard
+ * Admin dashboard overview
+ */
+export const getAdminDashboardOverview = async (req, res) => {
+  try {
+    // Start of today
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    // Aggregate dashboard data in parallel
+    const [totalBooks, totalUsers, totalSales, todaySales, revenueAgg] =
+      await Promise.all([
+        Book.countDocuments({ status: "approved" }), // total books
+        User.countDocuments(), // total users
+        Order.countDocuments({ paymentStatus: "paid" }), // total sales
+        Order.countDocuments({
+          paymentStatus: "paid",
+          createdAt: { $gte: startOfToday },
+        }), // today sales
+        Order.aggregate([
+          { $match: { paymentStatus: "paid" } },
+          { $group: { _id: null, revenue: { $sum: "$priceAtPurchase" } } },
+        ]),
+      ]);
+
+    const revenue = revenueAgg[0]?.revenue || 0;
+
+    // Downloads over time (daily)
+    const downloadsOverTime = await Order.aggregate([
+      { $match: { paymentStatus: "paid" } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+      { $project: { _id: 0, date: "$_id", count: 1 } },
+    ]);
+
+    // Top 5 books by sales
+    const topBooks = await Order.aggregate([
+      { $match: { paymentStatus: "paid" } },
+      { $group: { _id: "$book", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 5 },
+      {
+        $lookup: {
+          from: "books",
+          localField: "_id",
+          foreignField: "_id",
+          as: "book",
+        },
+      },
+      { $unwind: "$book" },
+      { $project: { _id: 0, title: "$book.title", count: 1 } },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      cards: { totalBooks, totalUsers, totalSales, todaySales, revenue },
+      downloadsOverTime,
+      topBooks,
+    });
+  } catch (error) {
+    console.error("Admin dashboard overview error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to load dashboard data" });
+  }
+};
+
+/**
+ * GET /api/admin/dashboard/top-books
+ * Top 10 performing books globally
+ */
+export const getTopPerformingBooks = async (req, res) => {
+  try {
+    const topBooks = await Order.aggregate([
+      { $match: { paymentStatus: "paid" } },
+      { $group: { _id: "$book", downloads: { $sum: 1 } } },
+      { $sort: { downloads: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: "books",
+          localField: "_id",
+          foreignField: "_id",
+          as: "book",
+        },
+      },
+      { $unwind: "$book" },
+    ]);
+
+    res.status(200).json({ success: true, topBooks });
+  } catch (error) {
+    console.error("Admin top books error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to load top books" });
   }
 };

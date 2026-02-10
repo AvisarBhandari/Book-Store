@@ -97,6 +97,9 @@ const NavBar = () => {
                   <li>
                     <NavLink to="/seller-login">Sell</NavLink>
                   </li>
+                  <li>
+                    <NavLink to="/admin-login">Admin</NavLink>
+                  </li>
                 </ul>
               </div>
             </li>

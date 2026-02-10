@@ -5,6 +5,8 @@ import {
   getAdmin,
   createadmin,
   loginadmin,
+  getAdminDashboardOverview,
+  getTopPerformingBooks,
 } from "../controllers/adminController.js";
 import { protect, allowRoles } from "../middlewares/auth.js";
 // TODO: admin history, stats,
@@ -12,26 +14,46 @@ const router = express.Router();
 /**
  * ! For Testing Purposes Only
  **/
-// TODO: Total Book,Salles,Total user,revenue stats 
+// TODO: Total Book,Salles,Total user,revenue stats
 // TODO: Download Reports (7day,30day,alltime)
 // TODO: new VS returning users
 // TODO: active users
-// TODO: Total Sellers,Total order,new Customers,avrg order value (RS) 
+// TODO: Total Sellers,Total order,new Customers,avrg order value (RS)
 // TODO: reset password
 
-router.get("/", protect,
+router.get(
+  "/",
+  protect,
   //  allowRoles("admin"),
- getAlladmin);
-
-router.get("/:id", protect,
-  //  allowRoles("admin"),
- getAdmin);
+  getAlladmin,
+);
 router.get("/profile", protect, allowRoles("admin"), (req, res) => {
   res.json({
     role: req.role,
     user: req.user,
   });
 });
+router.get(
+  "/dashboard/overview",
+  protect,
+  allowRoles("admin"),
+  getAdminDashboardOverview,
+);
+
+// Top performing books
+router.get(
+  "/dashboard/top-books",
+  protect,
+  allowRoles("admin"),
+  getTopPerformingBooks,
+);
+router.get(
+  "/:id",
+  protect,
+  //  allowRoles("admin"),
+  getAdmin,
+);
+
 router.post("/logout", (req, res) => {
   res.cookie("token", "", {
     httpOnly: true,

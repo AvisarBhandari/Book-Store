@@ -23,8 +23,10 @@ import SellerIndexPages from "./pages/seller/SellerindexPages.jsx";
 import SellrBookManagerPages from "./pages/seller/sellerbookManagementPages.jsx";
 import SellerSettingsPages from "./pages/seller/sellerSettingsPages.jsx";
 import SellerDashboardLayout from "./layouts/SellerDashboardLayout.jsx";
+import AdminDashboardLayout from "./layouts/AdminDashboardLayout.jsx";
 import SellerRegisterpage from "./pages/SellerRegisterPage.jsx";
 import AdminIndexPages from "./pages/admin/AdminindexPages.jsx";
+import AdminLoginPage from "./pages/admin/AdminLoginPage.jsx";
 const App = () => {
   return (
     <div data-theme="light">
@@ -57,9 +59,12 @@ const App = () => {
         {/* Auth */}
         <Route path="/seller-login" element={<SellerLogin />} />
         <Route path="/seller-register" element={<SellerRegisterpage />} />
+        <Route path="/admin-login" element={<AdminLoginPage />} />
 
         {/* Admin Dashboard */}
-        <Route path="/admin" element={<AdminIndexPages />} />
+        <Route path="/admin" element={<AdminDashboardLayout />}>
+          <Route index element={<AdminIndexPages />} />
+        </Route>
         {/* User Auth */}
         <Route path="/login" element={<LoginPages />} />
         <Route path="/register" element={<RegisterPages />} />
