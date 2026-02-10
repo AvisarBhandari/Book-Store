@@ -6,18 +6,19 @@ import {
   loginSeller,
   deleteSeller,
   updateSeller,
+  getSellerDashboardOverview,
+  getTopPerformingBooks,
+  getSellerBooks,
+  deleteBook,
+  exportSellerBooks,
 } from "../controllers/sellerController.js";
 import { protect, allowRoles } from "../middlewares/auth.js";
 
 const router = express.Router();
-//TODO: stats,get books by seller, Today sales, total sales
-// TODO: update seller profile pic,
-// TODO: sales over time
+
+// PROFILE
 router.get("/profile", protect, allowRoles("seller"), (req, res) => {
-  res.json({
-    role: req.role,
-    user: req.user,
-  });
+  res.json({ role: req.role, user: req.user });
 });
 router.post("/logout", (req, res) => {
   res.cookie("token", "", {
@@ -28,10 +29,36 @@ router.post("/logout", (req, res) => {
   });
   res.status(200).json({ message: "Logged out successfully" });
 });
+
+// AUTH & CRUD
 router.post("/login", loginSeller);
 router.put("/update", protect, allowRoles("seller", "admin"), updateSeller);
 router.get("/", getAllSeller);
 router.post("/create", upload.single("ppseller"), createSeller);
 router.delete("/delete", protect, allowRoles("seller", "admin"), deleteSeller);
+
+// DASHBOARD
+router.get(
+  "/dashboard/overview",
+  protect,
+  allowRoles("seller"),
+  getSellerDashboardOverview,
+);
+router.get(
+  "/dashboard/top-books",
+  protect,
+  allowRoles("seller"),
+  getTopPerformingBooks,
+);
+
+// SELLER BOOKS
+router.get("/:sellerId/books", protect, allowRoles("seller"), getSellerBooks);
+router.delete("/books/:bookId", protect, allowRoles("seller"), deleteBook);
+router.get(
+  "/:sellerId/books/export",
+  protect,
+  allowRoles("seller"),
+  exportSellerBooks,
+);
 
 export default router;
