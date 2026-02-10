@@ -14,7 +14,31 @@ export async function getAllSeller(req, res) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 }
+export async function changePassword(req, res) {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    const seller = await Seller.findById(req.user._id);
 
+    if (!seller) return res.status(404).json({ message: "Seller not found" });
+
+    const isMatch = await seller.comparePassword(currentPassword);
+    if (!isMatch)
+      return res.status(400).json({ message: "Current password is incorrect" });
+
+    if (newPassword !== confirmPassword) {
+      return res
+        .status(400)
+        .json({ message: "New password and confirm password do not match" });
+    }
+
+    seller.password = newPassword;
+    await seller.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+}
 export const createSeller = async (req, res) => {
   try {
     const { name, email, password, storeName, businessType } = req.body;

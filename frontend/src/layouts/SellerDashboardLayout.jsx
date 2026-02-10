@@ -12,8 +12,8 @@ const menu = [
     icon: <FaBook />,
     path: "/seller/book-management",
   },
-  { name: "Users", icon: <FaRegUser />, path: "/seller/user-management" },
-  { name: "Sales", icon: <FaArrowTrendUp />, path: "/seller/sales" },
+  // { name: "Users", icon: <FaRegUser />, path: "/seller/user-management" },
+  // { name: "Sales", icon: <FaArrowTrendUp />, path: "/seller/sales" },
   { name: "Settings", icon: <CiSettings />, path: "/seller/settings" },
 ];
 

@@ -21,8 +21,6 @@ import BookMarkPages from "./pages/BookMarkPages.jsx";
 import AutherBookPages from "./pages/AutherBookpages.jsx";
 import SellerIndexPages from "./pages/seller/SellerindexPages.jsx";
 import SellrBookManagerPages from "./pages/seller/sellerbookManagementPages.jsx";
-import SellerUserPages from "./pages/seller/sellerUserPages.jsx";
-import SellerSalesPages from "./pages/seller/SellerSalesPages.jsx";
 import SellerSettingsPages from "./pages/seller/sellerSettingsPages.jsx";
 import SellerDashboardLayout from "./layouts/SellerDashboardLayout.jsx";
 import SellerRegisterpage from "./pages/SellerRegisterPage.jsx";
@@ -48,8 +46,6 @@ const App = () => {
         <Route path="/seller" element={<SellerDashboardLayout />}>
           <Route index element={<SellerIndexPages />} />
           <Route path="book-management" element={<SellrBookManagerPages />} />
-          <Route path="user-management" element={<SellerUserPages />} />
-          <Route path="sales" element={<SellerSalesPages />} />
           <Route path="settings" element={<SellerSettingsPages />} />
         </Route>
 

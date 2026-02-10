@@ -11,6 +11,7 @@ import {
   getSellerBooks,
   deleteBook,
   exportSellerBooks,
+  changePassword,
 } from "../controllers/sellerController.js";
 import { protect, allowRoles } from "../middlewares/auth.js";
 
@@ -30,6 +31,7 @@ router.post("/logout", (req, res) => {
   res.status(200).json({ message: "Logged out successfully" });
 });
 
+router.put("/change-password", protect, allowRoles("seller"), changePassword);
 // AUTH & CRUD
 router.post("/login", loginSeller);
 router.put("/update", protect, allowRoles("seller", "admin"), updateSeller);
