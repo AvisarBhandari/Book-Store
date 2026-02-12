@@ -6,7 +6,9 @@ import {
   createBook,
   deleteBook,
   updateBook,
+  downloadBook,
 } from "../controllers/bookController.js";
+import { protect, allowRoles } from "../middlewares/auth.js";
 
 const router = express.Router();
 //TODO: reviews and ratings
@@ -16,6 +18,14 @@ const router = express.Router();
 //TODO: update book details
 router.get("/", getAllBooks);
 
+router.get(
+  "/:id/download",
+  protect,
+  allowRoles("user", "admin"),
+  downloadBook
+);
+router.get("/:id", getBookById);
+
 router.post(
   "/create",
   upload.fields([
@@ -24,7 +34,6 @@ router.post(
   ]),
   createBook
 );
-router.get("/:id", getBookById);
 router.put(
   "/update/:id",
   upload.fields([

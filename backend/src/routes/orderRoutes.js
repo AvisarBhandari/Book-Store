@@ -1,6 +1,7 @@
 import express from "express";
 import {
   buyBook,
+  buyMultipleBooks,
   getUserOrders,
   getSellerOrders,
   getOrderById,
@@ -11,6 +12,12 @@ import { protect, allowRoles } from "../middlewares/auth.js";
 const router = express.Router();
 
 router.post("/buy", protect, allowRoles("user", "admin"), buyBook);
+router.post(
+  "/buy-many",
+  protect,
+  allowRoles("user", "admin"),
+  buyMultipleBooks,
+);
 router.get("/user/orders", protect, allowRoles("user", "admin"), getUserOrders);
 router.get(
   "/seller/orders",

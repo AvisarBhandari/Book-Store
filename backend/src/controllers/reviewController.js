@@ -5,7 +5,8 @@ import mongoose from "mongoose";
 
 export const createOrUpdateReview = async (req, res) => {
   try {
-    const { bookId, rating, comment } = req.body;
+    const bookId = req.body.bookId || req.body.book;
+    const { rating, comment } = req.body;
 
     if (!bookId || !rating) {
       return res.status(400).json({ message: "Book & rating required" });
@@ -62,10 +63,27 @@ const updateBookRating = async (bookId) => {
   ]);
 
   await Book.findByIdAndUpdate(bookId, {
-    averageRating: stats[0]?.avgRating || 0,
-    reviewCount: stats[0]?.count || 0,
+    ratings: stats[0]?.avgRating ?? 0,
+    reviewCount: stats[0]?.count ?? 0,
   });
 };
+export const canReview = async (req, res) => {
+  try {
+    const { bookId } = req.params;
+    if (!req.user || req.role !== "user") {
+      return res.json({ canReview: false });
+    }
+    const hasPurchased = await Order.exists({
+      user: req.user._id,
+      book: bookId,
+      paymentStatus: "paid",
+    });
+    return res.json({ canReview: !!hasPurchased });
+  } catch (err) {
+    res.json({ canReview: false });
+  }
+};
+
 export const getBookReviews = async (req, res) => {
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;

@@ -9,6 +9,8 @@ import {
   deleteuser,
   getBookmarks,
   toggleBookmark,
+  updateProfile,
+  changePassword,
 } from "../controllers/userController.js";
 import upload from "../middlewares/ppUpload.js";
 import { protect, allowRoles } from "../middlewares/auth.js";
@@ -22,6 +24,8 @@ router.get("/profile", protect, allowRoles("user"), (req, res) => {
     user: req.user,
   });
 });
+router.put("/profile", protect, allowRoles("user"), upload.single("ppuser"), updateProfile);
+router.put("/profile/password", protect, allowRoles("user"), changePassword);
 router.post("/logout", (req, res) => {
   res.cookie("token", "", {
     httpOnly: true,
@@ -45,7 +49,7 @@ router.post("/login", loginuser);
 // Get bookmarks for a user
 router.get("/:userId/bookmarks", getBookmarks);
 
-// Add/remove bookmark
-router.post("/bookmark", toggleBookmark);
+// Add/remove bookmark (requires login)
+router.post("/bookmark", protect, allowRoles("user"), toggleBookmark);
 
 export default router;

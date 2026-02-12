@@ -34,7 +34,13 @@ router.post("/logout", (req, res) => {
 router.put("/change-password", protect, allowRoles("seller"), changePassword);
 // AUTH & CRUD
 router.post("/login", loginSeller);
-router.put("/update", protect, allowRoles("seller", "admin"), updateSeller);
+router.put(
+  "/update",
+  protect,
+  allowRoles("seller", "admin"),
+  upload.single("ppseller"),
+  updateSeller,
+);
 router.get("/", getAllSeller);
 router.post("/create", upload.single("ppseller"), createSeller);
 router.delete("/delete", protect, allowRoles("seller", "admin"), deleteSeller);

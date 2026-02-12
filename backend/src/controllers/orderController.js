@@ -5,7 +5,12 @@ import User from "../models/user.js";
 export const buyBook = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { bookId, paymentMethod } = req.body;
+    const rawBookId = req.body.bookId;
+    const bookId = rawBookId ? String(rawBookId).split('?')[0].trim() : null;
+    const paymentMethod = req.body.paymentMethod;
+    if (!bookId) {
+      return res.status(400).json({ message: "bookId required" });
+    }
 
     const book = await Book.findById(bookId);
     console.log(userId);
@@ -57,6 +62,83 @@ export const getUserOrders = async (req, res) => {
       .populate("book")
       .populate("seller", "name email");
     res.status(200).json({ orders });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const buyMultipleBooks = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { bookIds, paymentMethod } = req.body;
+
+    if (!Array.isArray(bookIds) || bookIds.length === 0) {
+      return res.status(400).json({ message: "bookIds array required" });
+    }
+
+    const sanitizedIds = [
+      ...new Set(
+        bookIds
+          .map((id) => String(id).split("?")[0].trim())
+          .filter(Boolean),
+      ),
+    ];
+
+    if (!sanitizedIds.length) {
+      return res.status(400).json({ message: "No valid bookIds provided" });
+    }
+
+    const books = await Book.find({ _id: { $in: sanitizedIds } });
+    const booksMap = new Map(books.map((b) => [String(b._id), b]));
+
+    const ordersToCreate = [];
+
+    for (const id of sanitizedIds) {
+      const book = booksMap.get(id);
+      if (!book) continue;
+
+      const alreadyBought = await Order.findOne({
+        user: userId,
+        book: id,
+        paymentStatus: "paid",
+      });
+
+      if (alreadyBought) continue;
+
+      ordersToCreate.push({
+        user: userId,
+        book: id,
+        seller: book.seller,
+        priceAtPurchase: book.finalPrice || book.price,
+        paymentMethod,
+        paymentStatus: "paid",
+      });
+    }
+
+    if (!ordersToCreate.length) {
+      return res
+        .status(400)
+        .json({ message: "All selected books are already purchased" });
+    }
+
+    const orders = await Order.insertMany(ordersToCreate);
+
+    // Update user purchasedBooks
+    await User.findByIdAndUpdate(userId, {
+      $addToSet: { purchasedBooks: { $each: sanitizedIds } },
+    });
+
+    // Update soldCount for each book
+    await Book.updateMany(
+      { _id: { $in: sanitizedIds } },
+      { $inc: { soldCount: 1 } },
+    );
+
+    res.status(201).json({
+      message: "Books purchased successfully",
+      count: orders.length,
+      orders,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

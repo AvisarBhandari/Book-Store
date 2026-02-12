@@ -3,6 +3,7 @@ import {
   createOrUpdateReview,
   getBookReviews,
   deleteReview,
+  canReview,
 } from "../controllers/reviewController.js";
 import { protect, allowRoles } from "../middlewares/auth.js";
 
@@ -12,6 +13,12 @@ router.post(
   protect,
   allowRoles("user", "admin", "seller"),
   createOrUpdateReview,
+);
+router.get(
+  "/can-review/:bookId",
+  protect,
+  allowRoles("user", "admin", "seller"),
+  canReview,
 );
 
 router.get("/:bookId", getBookReviews);

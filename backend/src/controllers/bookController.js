@@ -1,11 +1,17 @@
 import Book from "../models/book.js";
+import Order from "../models/order.js";
 import fs from "fs";
+import path from "path";
 import { similarityScore } from "../algorithem/fuzzySearch.js";
-// import path from "path";
 
 export async function getAllBooks(req, res) {
   try {
-    const books = await Book.find();
+    const { category, categoryId, author } = req.query;
+    const filter = { status: "approved" };
+    if (category) filter.category = new RegExp(`^${category}$`, "i");
+    if (categoryId) filter.categoryID = categoryId;
+    if (author) filter.author = new RegExp(`^${author}$`, "i");
+    const books = await Book.find(filter);
     res.status(200).json(books);
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
@@ -21,6 +27,38 @@ export async function getBookById(req, res) {
     res.status(200).json(book);
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
+  }
+}
+
+export async function downloadBook(req, res) {
+  try {
+    const rawId = req.params.id;
+    const id = rawId ? String(rawId).split('?')[0].trim() : null;
+    if (!id) return res.status(400).json({ message: "Book id required" });
+    const userId = req.user._id;
+    const book = await Book.findById(id);
+    if (!book) return res.status(404).json({ message: "Book not found" });
+
+    const purchased = await Order.findOne({
+      user: userId,
+      book: id,
+      paymentStatus: "paid",
+    });
+    if (!purchased) {
+      return res.status(403).json({ message: "Purchase required to download" });
+    }
+
+    const filePath = path.isAbsolute(book.bookFile)
+      ? book.bookFile
+      : path.join(path.resolve(), book.bookFile);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: "File not found" });
+    }
+    const filename = path.basename(book.bookFile) || `${book.title.replace(/[^a-z0-9]/gi, "_")}.pdf`;
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.sendFile(filePath);
+  } catch (err) {
+    res.status(500).json({ message: "Server Error", error: err.message });
   }
 }
 

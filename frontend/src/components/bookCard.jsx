@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { FiHeart, FiShoppingCart } from "react-icons/fi";
+import { FiHeart, FiShoppingCart, FiDownload } from "react-icons/fi";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -30,9 +31,12 @@ export default function BookCard({ bookId }) {
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
-  const [user, setUser] = useState(null);
 
+  const { user } = useAuth();
   const { addToCart, isInCart } = useCart();
+  const purchased = user?.purchasedBooks?.some(
+    (id) => id === bookId || id?.toString() === String(bookId)
+  );
 
   /* ---------------- Fetch book ---------------- */
   useEffect(() => {
@@ -55,26 +59,15 @@ export default function BookCard({ bookId }) {
     return () => (mounted = false);
   }, [bookId]);
 
-  /* ---------------- Fetch user ---------------- */
+  /* ---------------- Bookmark state from user ---------------- */
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await axios.get("http://localhost:5001/api/user/profile", {
-          withCredentials: true,
-        });
-
-        setUser(res.data.user);
-
-        if (res.data.user.bookmarks.includes(bookId)) {
-          setBookmarked(true);
-        }
-      } catch {
-        setUser(null);
-      }
-    };
-
-    fetchProfile();
-  }, [bookId]);
+    if (!user) {
+      setBookmarked(false);
+      return;
+    }
+    const ids = user.bookmarks || [];
+    setBookmarked(ids.some((b) => b?.toString() === String(bookId)));
+  }, [user, bookId]);
 
   if (loading) return <BookCardSkeleton />;
   if (!book) return null;
@@ -85,37 +78,54 @@ export default function BookCard({ bookId }) {
   const handleAddToCart = (e) => {
     e.stopPropagation();
     if (adding) return;
-
+    if (!user) {
+      toast.error("Please login to add to basket");
+      navigate("/login");
+      return;
+    }
     setAdding(true);
     addToCart(book);
-
     setTimeout(() => setAdding(false), 800);
+  };
+
+  const handleDownload = async (e) => {
+    e.stopPropagation();
+    if (!user) return;
+    try {
+      const res = await axios.get(
+        `http://localhost:5001/api/book/${bookId}/download`,
+        { withCredentials: true, responseType: "blob" },
+      );
+      const url = URL.createObjectURL(res.data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = (book?.title || "book").replace(/[^a-z0-9.-]/gi, "_") + ".pdf";
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Download started");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Download failed");
+    }
   };
 
   const handleBookmark = async (e) => {
     e.stopPropagation();
-
     if (!user) {
       toast.error("Please login to bookmark books");
+      navigate("/login");
       return;
     }
-
     setBookmarked((prev) => !prev);
-
     try {
       const res = await axios.post(
         "http://localhost:5001/api/user/bookmark",
         { bookId },
         { withCredentials: true },
       );
-
-      const exists = res.data.bookmarks.some(
-        (b) => b === bookId || b._id === bookId,
-      );
-
+      const ids = res.data.bookmarks || [];
+      const exists = ids.some((b) => b?.toString() === String(bookId));
       setBookmarked(exists);
-
-      toast.success(exists ? "Book bookmarked ❤️" : "Bookmark removed");
+      toast.success(exists ? "Book bookmarked" : "Bookmark removed");
     } catch {
       setBookmarked((prev) => !prev);
       toast.error("Failed to update bookmark");
@@ -163,7 +173,15 @@ export default function BookCard({ bookId }) {
 
         {/* Actions */}
         <div className="mt-auto flex items-center gap-3">
-          {!inCart ? (
+          {purchased ? (
+            <button
+              onClick={handleDownload}
+              className="bg-[#22c55e] text-white px-4 h-[38px] rounded-xl text-sm font-medium flex items-center gap-2"
+            >
+              <FiDownload />
+              Download
+            </button>
+          ) : !inCart ? (
             <button
               onClick={handleAddToCart}
               className="bg-[#FFD84D] px-4 h-[38px] rounded-xl text-sm font-medium"

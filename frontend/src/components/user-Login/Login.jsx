@@ -3,9 +3,11 @@ import Logo from "../../assets/Logo.png";
 import { NavLink, useNavigate } from "react-router-dom";
 import { FaLock } from "react-icons/fa";
 import { CiMail } from "react-icons/ci";
+import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -59,8 +61,7 @@ const Login = () => {
         throw new Error(data.message || "Login failed");
       }
 
-      console.log(data);
-
+      await refreshUser();
       navigate("/");
     } catch (error) {
       setErrors({ api: error.message });

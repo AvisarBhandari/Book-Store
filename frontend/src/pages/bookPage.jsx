@@ -4,6 +4,7 @@ import NavBar from "../components/navBar.jsx";
 import Footer from "../components/footer.jsx";
 import BookFirst from "../components/book/Book-first.jsx";
 import BookSecond from "../components/book/book-second.jsx";
+import BookRelated from "../components/book/BookRelated.jsx";
 import axios from "axios";
 
 const BookPage = () => {
@@ -39,6 +40,7 @@ const BookPage = () => {
           <>
             <BookFirst book={book} />
             <BookSecond book={book} />
+            <BookRelated book={book} />
           </>
         )}
       </main>

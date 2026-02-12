@@ -163,45 +163,107 @@ export const searchSuggestions = async (req, res) => {
       .lean();
 
     // Normalize & merge
-    const suggestions = [
-      ...bookTitles.map((b) => ({
+    // Build suggestions using manual loops (no map/flatMap)
+    const suggestions = [];
+    let idx = 0;
+
+    // Book titles
+    let i = 0;
+    while (i < bookTitles.length) {
+      const b = bookTitles[i];
+      suggestions[idx] = {
         type: "book",
         value: b.title,
         bookId: b._id,
         coverImage: b.coverImage,
-      })),
+      };
+      idx = idx + 1;
+      i = i + 1;
+    }
 
-      ...authors.map((a) => ({
+    // Authors
+    i = 0;
+    while (i < authors.length) {
+      const a = authors[i];
+      suggestions[idx] = {
         type: "author",
         value: a.author,
-      })),
+      };
+      idx = idx + 1;
+      i = i + 1;
+    }
 
-      ...genres.flatMap((g) =>
-        g.genres
-          .filter((x) => regex.test(x))
-          .map((x) => ({
+    // Genres
+    i = 0;
+    while (i < genres.length) {
+      const g = genres[i];
+      let gi = 0;
+      const gArr = g.genres || [];
+      while (gi < gArr.length) {
+        const x = gArr[gi];
+        if (regex.test(x)) {
+          suggestions[idx] = {
             type: "genre",
             value: x,
-          })),
-      ),
+          };
+          idx = idx + 1;
+        }
+        gi = gi + 1;
+      }
+      i = i + 1;
+    }
 
-      ...categories.map((c) => ({
+    // Categories
+    i = 0;
+    while (i < categories.length) {
+      const c = categories[i];
+      suggestions[idx] = {
         type: "category",
         value: c.name,
-      })),
+      };
+      idx = idx + 1;
+      i = i + 1;
+    }
 
-      ...sellers.map((s) => ({
+    // Sellers
+    i = 0;
+    while (i < sellers.length) {
+      const s = sellers[i];
+      suggestions[idx] = {
         type: "seller",
         value: s.storeName || s.name,
-      })),
-    ];
+      };
+      idx = idx + 1;
+      i = i + 1;
+    }
 
-    // Deduplicate by value + type
-    const unique = Array.from(
-      new Map(
-        suggestions.map((s) => [`${s.type}-${s.value.toLowerCase()}`, s]),
-      ).values(),
-    ).slice(0, 8);
+    // Deduplicate by type+value (case-insensitive) and limit to 8
+    const unique = [];
+    i = 0;
+    while (i < suggestions.length && unique.length < 8) {
+      const cur = suggestions[i];
+      const curKeyType = cur.type;
+      const curValLower = cur.value.toLowerCase();
+
+      let found = false;
+      let j = 0;
+      while (j < unique.length) {
+        const u = unique[j];
+        if (
+          u.type === curKeyType &&
+          u.value.toLowerCase() === curValLower
+        ) {
+          found = true;
+          break;
+        }
+        j = j + 1;
+      }
+
+      if (!found) {
+        unique[unique.length] = cur;
+      }
+      i = i + 1;
+    }
 
     res.json(unique);
   } catch (err) {

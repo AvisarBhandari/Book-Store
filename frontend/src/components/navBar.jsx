@@ -3,7 +3,8 @@ import { NavLink, useNavigate } from "react-router-dom";
 import SearchBar from "./SearchBar";
 import { FiChevronDown, FiShoppingCart } from "react-icons/fi";
 import { useCart } from "../context/CartContext";
-import React, { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import React from "react";
 
 const formatPrice = (v) => Number(v).toFixed(2);
 
@@ -18,31 +19,8 @@ const navLinkClass = ({ isActive }) =>
 const NavBar = () => {
   const navigate = useNavigate();
   const { cart, removeFromCart, subtotal } = useCart();
+  const { user, setUser, loading: loadingUser } = useAuth();
 
-  const [user, setUser] = useState(null);
-  const [loadingUser, setLoadingUser] = useState(true);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await fetch("http://localhost:5001/api/user/profile", {
-          method: "GET",
-          credentials: "include",
-        });
-
-        if (!res.ok) throw new Error("Not logged in");
-
-        const data = await res.json();
-        setUser(data.user);
-      } catch (err) {
-        setUser(null);
-      } finally {
-        setLoadingUser(false);
-      }
-    };
-
-    fetchProfile();
-  }, []);
   const getAvatar = () => {
     if (!user) return "";
 
@@ -258,6 +236,7 @@ const NavBar = () => {
                           credentials: "include",
                         });
                         setUser(null);
+                        navigate("/");
                       }}
                     >
                       Logout

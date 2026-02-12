@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 const CategoryCard = ({ category }) => {
   return (
     <div>
-      <NavLink to={`/search?categories=${category.name}`} className="">
+      <NavLink to={`/categories/${encodeURIComponent(category.name)}`} className="">
         <div className="card bg-base-100 shadow-md hover:shadow-lg transition">
           <div className="card-body">
             <h2 className="card-title capitalize">{category.name}</h2>

@@ -1,9 +1,27 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { useCart, formatPrice } from "../context/CartContext";
-import { handleEsewaPayment, confirmPurchase } from "../utils/paymentUtil";
+import { useAuth } from "../context/AuthContext";
+import { handleEsewaPayment } from "../utils/paymentUtil";
+import { toast } from "react-hot-toast";
 
 const Cart = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { cart, removeFromCart, subtotal } = useCart();
+
+  const handleCheckout = () => {
+    if (!user) {
+      toast.error("Please login to proceed to checkout");
+      navigate("/login");
+      return;
+    }
+    if (cart.length === 0) return;
+
+    // For cart checkout, encode all book IDs into a single string.
+    const bookIdsString = cart.map((item) => item._id).join(",");
+    handleEsewaPayment({ _id: bookIdsString, finalPrice: subtotal });
+  };
 
   return (
     <div className="bg-[#FAFAFA] min-h-screen">
@@ -120,9 +138,7 @@ const Cart = () => {
               </div>
 
               <button
-                onClick={() =>
-                  handleEsewaPayment({ _id: "bookId", finalPrice: subtotal })
-                }
+                onClick={handleCheckout}
                 className="w-full btn btn-neutral rounded-none hover:bg-white hover:text-black py-3 font-semibold text-white  hover:border-black  transition"
               >
                 Proceed to Checkout

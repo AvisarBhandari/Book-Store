@@ -199,36 +199,76 @@ export const getBookmarks = async (req, res) => {
   }
 };
 
-// ADD or REMOVE a bookmark
+// Update current user profile (name, email, avatar)
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { name, email } = req.body;
+    const updates = {};
+    if (name !== undefined) updates.name = name;
+    if (email !== undefined) updates.email = email;
+    if (req.file?.path) updates.ppImage = req.file.path;
+
+    const user = await User.findByIdAndUpdate(userId, updates, {
+      new: true,
+      runValidators: true,
+    }).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.status(200).json({ success: true, user });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+// Change current user password
+export const changePassword = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Current and new password required" });
+    }
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+    user.password = newPassword;
+    await user.save();
+    res.status(200).json({ success: true, message: "Password updated" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+// ADD or REMOVE a bookmark (userId from authenticated user)
 export const toggleBookmark = async (req, res) => {
   try {
-    const { userId, bookId } = req.body;
+    const userId = req.user._id;
+    const { bookId } = req.body;
+    if (!bookId) return res.status(400).json({ message: "bookId required" });
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Check if book is already bookmarked
     const index = user.bookmarks.findIndex((id) => id.toString() === bookId);
-
     let action;
     if (index === -1) {
-      // Not bookmarked, add it
       user.bookmarks.push(bookId);
       action = "added";
     } else {
-      // Already bookmarked, remove it
       user.bookmarks.splice(index, 1);
       action = "removed";
     }
-
     await user.save();
 
-    // Optionally, populate bookmarks to return full book data
-    const updatedUser = await User.findById(userId).populate("bookmarks");
+    const updatedUser = await User.findById(userId).select("bookmarks");
+    const bookmarkIds = (updatedUser.bookmarks || []).map((b) => b.toString());
 
     res.json({
       message: `Bookmark ${action} successfully`,
-      bookmarks: updatedUser.bookmarks,
+      bookmarks: bookmarkIds,
     });
   } catch (err) {
     console.error(err);

@@ -1,31 +1,84 @@
 // Levenshtein distance
-export function levenshtein(a, b) {
-  const matrix = Array.from({ length: b.length + 1 }, () =>
-    Array(a.length + 1).fill(0),
-  );
+function coreLevenshtein(aChars, aLen, bChars, bLen) {
+  // Use two rolling rows to save memory
+  const prev = [];
+  const curr = [];
 
-  for (let i = 0; i <= a.length; i++) matrix[0][i] = i;
-  for (let j = 0; j <= b.length; j++) matrix[j][0] = j;
-
-  for (let j = 1; j <= b.length; j++) {
-    for (let i = 1; i <= a.length; i++) {
-      if (a[i - 1] === b[j - 1]) matrix[j][i] = matrix[j - 1][i - 1];
-      else
-        matrix[j][i] = Math.min(
-          matrix[j - 1][i - 1] + 1,
-          matrix[j][i - 1] + 1,
-          matrix[j - 1][i] + 1,
-        );
-    }
+  let i = 0;
+  while (i <= aLen) {
+    prev[i] = i;
+    i = i + 1;
   }
 
-  return matrix[b.length][a.length];
+  let j = 1;
+  while (j <= bLen) {
+    curr[0] = j;
+    i = 1;
+    while (i <= aLen) {
+      const match = aChars[i - 1] === bChars[j - 1] ? 0 : 1;
+
+      const del = prev[i] + 1;
+      const ins = curr[i - 1] + 1;
+      const sub = prev[i - 1] + match;
+
+      let best = del;
+      if (ins < best) best = ins;
+      if (sub < best) best = sub;
+
+      curr[i] = best;
+      i = i + 1;
+    }
+
+    // swap rows
+    i = 0;
+    while (i <= aLen) {
+      const tmp = prev[i];
+      prev[i] = curr[i];
+      curr[i] = tmp;
+      i = i + 1;
+    }
+
+    j = j + 1;
+  }
+
+  return prev[aLen];
 }
+
+// Public Levenshtein wrapper – allowed to use JS helpers outside core function
+export function levenshtein(a, b) {
+  const aLen = a ? a.length : 0;
+  const bLen = b ? b.length : 0;
+
+  const aChars = [];
+  const bChars = [];
+
+  let i = 0;
+  while (i < aLen) {
+    aChars[i] = a[i];
+    i = i + 1;
+  }
+
+  i = 0;
+  while (i < bLen) {
+    bChars[i] = b[i];
+    i = i + 1;
+  }
+
+  return coreLevenshtein(aChars, aLen, bChars, bLen);
+}
+
+// Similarity score
 
 export function similarityScore(a, b) {
   if (!a || !b) return 0;
   const distance = levenshtein(a, b);
-  const maxLen = Math.max(a.length, b.length);
+
+  const lenA = a.length;
+  const lenB = b.length;
+  const maxLen = lenA > lenB ? lenA : lenB;
+
+  if (maxLen === 0) return 0;
+
   const score = 1 - distance / maxLen;
   return score >= 0.5 ? score : 0;
 }
@@ -37,56 +90,159 @@ export function meaningfulScore(score, query) {
   return score >= 0.5;
 }
 
+// Book ranking
+
 export function rankBooks(books, query) {
-  const tokens = query.toLowerCase().split(/\s+/);
+  const q = query.toLowerCase();
 
-  return books
-    .map((book) => {
-      let score = 0;
-      let priority = 99;
+  // Split tokens manually (on spaces) to avoid using built-in split and regex
+  const tokens = [];
+  let current = "";
+  let idx = 0;
+  while (idx < q.length) {
+    const ch = q[idx];
+    if (ch === " " || ch === "\t" || ch === "\n") {
+      if (current !== "") {
+        tokens[tokens.length] = current;
+        current = "";
+      }
+    } else {
+      current = current + ch;
+    }
+    idx = idx + 1;
+  }
+  if (current !== "") {
+    tokens[tokens.length] = current;
+  }
 
-      const title = book.title?.toLowerCase() || "";
-      const author = book.author?.toLowerCase() || "";
-      const description = book.description?.toLowerCase() || "";
-      const category = book.categoryID?.name?.toLowerCase() || "";
+  const ranked = [];
 
-      const best = (text, weight, p) => {
-        const match = Math.max(
-          ...tokens.map((t) =>
-            text.includes(t) ? 1 : similarityScore(t, text),
-          ),
-        );
-        if (match > 0) {
-          priority = Math.min(priority, p);
-          score += match * weight;
+  let bi = 0;
+  while (bi < books.length) {
+    const book = books[bi];
+    let score = 0;
+    let priority = 99;
+
+    const title = book.title ? book.title.toLowerCase() : "";
+    const author = book.author ? book.author.toLowerCase() : "";
+    const description = book.description ? book.description.toLowerCase() : "";
+    const category =
+      book.categoryID && book.categoryID.name
+        ? book.categoryID.name.toLowerCase()
+        : "";
+
+    // best-match helper using only manual loops
+    function best(text, weight, p) {
+      let bestMatch = 0;
+      let ti = 0;
+      while (ti < tokens.length) {
+        const t = tokens[ti];
+
+        // simple includes check (manual)
+        let contains = false;
+        let pi = 0;
+        while (!contains && pi + t.length <= text.length) {
+          let k = 0;
+          let ok = true;
+          while (k < t.length) {
+            if (text[pi + k] !== t[k]) {
+              ok = false;
+              break;
+            }
+            k = k + 1;
+          }
+          if (ok) contains = true;
+          pi = pi + 1;
         }
-      };
 
-      best(title, 5, 0);
-      best(category, 4, 1);
-      best(author, 2.5, 3);
-      best(description, 1, 5);
+        const rawScore = contains ? 1 : similarityScore(t, text);
+        if (rawScore > bestMatch) bestMatch = rawScore;
 
-      if (book.genres?.length) {
-        const gMatch = Math.max(
-          ...book.genres.flatMap((g) =>
-            tokens.map((t) =>
-              g.toLowerCase().includes(t)
-                ? 1
-                : similarityScore(t, g.toLowerCase()),
-            ),
-          ),
-        );
-        if (gMatch > 0) {
-          priority = Math.min(priority, 2);
-          score += gMatch * 3;
-        }
+        ti = ti + 1;
       }
 
-      return { book, score, priority };
-    })
-    .filter((r) => meaningfulScore(r.score, query))
-    .sort((a, b) =>
-      a.priority !== b.priority ? a.priority - b.priority : b.score - a.score,
-    );
+      if (bestMatch > 0) {
+        if (p < priority) priority = p;
+        score = score + bestMatch * weight;
+      }
+    }
+
+    best(title, 5, 0);
+    best(category, 4, 1);
+    best(author, 2.5, 3);
+    best(description, 1, 5);
+
+    // genres
+    if (book.genres && book.genres.length) {
+      let gMatch = 0;
+      let gi = 0;
+      while (gi < book.genres.length) {
+        const g = String(book.genres[gi]).toLowerCase();
+        let ti = 0;
+        while (ti < tokens.length) {
+          const t = tokens[ti];
+
+          // simple includes check
+          let contains = false;
+          let pi = 0;
+          while (!contains && pi + t.length <= g.length) {
+            let k = 0;
+            let ok = true;
+            while (k < t.length) {
+              if (g[pi + k] !== t[k]) {
+                ok = false;
+                break;
+              }
+              k = k + 1;
+            }
+            if (ok) contains = true;
+            pi = pi + 1;
+          }
+
+          const rawScore = contains ? 1 : similarityScore(t, g);
+          if (rawScore > gMatch) gMatch = rawScore;
+
+          ti = ti + 1;
+        }
+        gi = gi + 1;
+      }
+
+      if (gMatch > 0) {
+        if (2 < priority) priority = 2;
+        score = score + gMatch * 3;
+      }
+    }
+
+    if (meaningfulScore(score, query)) {
+      const pos = ranked.length;
+      ranked[pos] = { book, score, priority };
+    }
+
+    bi = bi + 1;
+  }
+
+  // Manual selection sort: highest relevance first, lowest priority number first
+  const n = ranked.length;
+  let i = 0;
+  while (i < n - 1) {
+    let bestIndex = i;
+    let j = i + 1;
+    while (j < n) {
+      const a = ranked[j];
+      const b = ranked[bestIndex];
+      const better =
+        a.priority < b.priority ||
+        (a.priority === b.priority && a.score > b.score);
+      if (better) bestIndex = j;
+      j = j + 1;
+    }
+    if (bestIndex !== i) {
+      const tmp = ranked[i];
+      ranked[i] = ranked[bestIndex];
+      ranked[bestIndex] = tmp;
+    }
+    i = i + 1;
+  }
+
+  return ranked;
 }

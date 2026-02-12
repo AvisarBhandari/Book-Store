@@ -5,6 +5,7 @@ import BookCarousel from "../components/BookCarousel.jsx";
 import Footer from "../components/footer.jsx";
 import OfferSection from "../components/OfferSection.jsx";
 import { useAuthRedirect } from "../utils/auth.jsx";
+import Loader from "../components/Loader.jsx";
 
 const HomePages = () => {
   const loading = useAuthRedirect();
@@ -13,7 +14,7 @@ const HomePages = () => {
     // Show loader while checking
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-500">Checking login...</p>
+        <Loader />
       </div>
     );
   }

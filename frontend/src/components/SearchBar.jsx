@@ -20,7 +20,6 @@ const SearchBar = () => {
     setOpen(false);
   };
 
-  /* 🔍 Fetch suggestions */
   useEffect(() => {
     if (!query.trim()) {
       setSuggestions([]);
@@ -33,7 +32,7 @@ const SearchBar = () => {
       try {
         setLoading(true);
         const res = await fetch(
-          `http://localhost:5001/api/search/suggestions?q=${query}`
+          `http://localhost:5001/api/search/suggestions?q=${query}`,
         );
         const data = await res.json();
         setSuggestions(data);
@@ -48,7 +47,6 @@ const SearchBar = () => {
 
   return (
     <div className=" w-[240px] md:w-[300px]">
-      {/* ⬇️ FORM SUBMIT → REDIRECT */}
       <form
         className="relative group"
         onSubmit={(e) => {

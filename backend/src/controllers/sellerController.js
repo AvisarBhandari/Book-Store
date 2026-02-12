@@ -80,10 +80,23 @@ export const createSeller = async (req, res) => {
 export async function updateSeller(req, res) {
   try {
     const sellerId = req.user._id;
-    const updates = req.body;
+    const updates = { ...req.body };
+
+    // If a new profile picture is uploaded, update ppImage (and avatarType)
+    if (req.file && req.file.path) {
+      updates.ppImage = req.file.path;
+      updates.avatarType = "uploaded";
+    }
+
     const updatedSeller = await Seller.findByIdAndUpdate(sellerId, updates, {
       new: true,
+      runValidators: true,
     });
+
+    if (!updatedSeller) {
+      return res.status(404).json({ message: "Seller not found" });
+    }
+
     res.status(200).json({
       message: "Seller updated successfully",
       seller: updatedSeller,

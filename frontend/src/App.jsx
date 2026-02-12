@@ -1,5 +1,8 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useSearchParams, useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { confirmPurchase } from "./utils/paymentUtil";
+import { toast } from "react-hot-toast";
 
 import HomePages from "./pages/homePages.jsx";
 import AboutPages from "./pages/aboutPages.jsx";
@@ -31,9 +34,50 @@ import AdminBookManagementPages from "./pages/admin/AdminBookManagementPages.jsx
 import AdminUserManagementPages from "./pages/admin/AdminUserManagementPages.jsx";
 import AdminSalesManagementPages from "./pages/admin/AdminSalesManagementPages.jsx";
 import AdminSettingsManagementPages from "./pages/admin/AdminSettingsManagementPages.jsx";
+import OrdersPage from "./pages/OrdersPage.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
+import CategoryBooksPage from "./pages/CategoryBooksPage.jsx";
+
+function PaymentReturnHandler() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const handled = useRef(false);
+
+  useEffect(() => {
+    const status = searchParams.get("paymentStatus");
+    const rawBookId = searchParams.get("bookId");
+    const bookId = rawBookId ? String(rawBookId).split("?")[0].trim() : null;
+    if (!status || !bookId || handled.current) return;
+    handled.current = true;
+
+    const isMulti = bookId.includes(",");
+
+    if (status === "success") {
+      confirmPurchase(bookId).then((ok) => {
+        if (ok)
+          toast.success(
+            "Payment successful! You can now download your book(s).",
+          );
+        navigate(isMulti ? "/orders" : `/book/${bookId}`, { replace: true });
+      });
+    } else {
+      toast.error("Payment failed or cancelled.");
+      navigate("/cart", { replace: true });
+    }
+    setSearchParams((p) => {
+      p.delete("paymentStatus");
+      p.delete("bookId");
+      return p;
+    }, { replace: true });
+  }, [searchParams, setSearchParams, navigate]);
+
+  return null;
+}
+
 const App = () => {
   return (
     <div data-theme="light">
+      <PaymentReturnHandler />
       <Routes>
         {/* main pages */}
         <Route path="/" element={<HomePages />} />
@@ -60,6 +104,9 @@ const App = () => {
         <Route path="/book/:id" element={<BookPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/categories/:identifier" element={<CategoryBooksPage />} />
         {/* Auth */}
         <Route path="/seller-login" element={<SellerLogin />} />
         <Route path="/seller-register" element={<SellerRegisterpage />} />
