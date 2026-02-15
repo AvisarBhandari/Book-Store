@@ -55,10 +55,9 @@ export const getAdminSellersTable = async ({ page = 1, search = "" } = {}) => {
 };
 
 export const adminDeleteUser = async (id) => {
-  await axios.delete(
-    `http://localhost:5001/api/admin/dashboard/users/${id}`,
-    { withCredentials: true },
-  );
+  await axios.delete(`http://localhost:5001/api/admin/dashboard/users/${id}`, {
+    withCredentials: true,
+  });
 };
 
 export const adminDeleteSeller = async (id) => {
@@ -132,10 +131,10 @@ export const getAdminOrdersTable = async ({
 };
 
 export const adminDeleteOrders = async (ids) => {
-  await axios.delete(
-    "http://localhost:5001/api/admin/dashboard/orders",
-    { data: { ids }, withCredentials: true },
-  );
+  await axios.delete("http://localhost:5001/api/admin/dashboard/orders", {
+    data: { ids },
+    withCredentials: true,
+  });
 };
 
 // ------------------------- Settings -------------------------
@@ -149,7 +148,10 @@ export const getAdminProfile = async () => {
 export const updateAdminProfile = async (formData) => {
   const res = await axios.put(`${API_BASE}/settings/profile`, formData, {
     withCredentials: true,
-    headers: formData instanceof FormData ? {} : { "Content-Type": "application/json" },
+    headers:
+      formData instanceof FormData
+        ? {}
+        : { "Content-Type": "application/json" },
   });
   return res.data;
 };
@@ -178,7 +180,10 @@ export const getAdminAdminsTable = async ({
 export const adminCreateAdmin = async (formData) => {
   const res = await axios.post(`${API_BASE}/dashboard/admins`, formData, {
     withCredentials: true,
-    headers: formData instanceof FormData ? {} : { "Content-Type": "application/json" },
+    headers:
+      formData instanceof FormData
+        ? {}
+        : { "Content-Type": "application/json" },
   });
   return res.data;
 };
