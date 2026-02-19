@@ -29,15 +29,7 @@ import {
 import { protect, allowRoles } from "../middlewares/auth.js";
 // TODO: admin history, stats,
 const router = express.Router();
-/**
- * ! For Testing Purposes Only
- **/
-// TODO: Total Book,Salles,Total user,revenue stats
-// TODO: Download Reports (7day,30day,alltime)
-// TODO: new VS returning users
-// TODO: active users
-// TODO: Total Sellers,Total order,new Customers,avrg order value (RS)
-// TODO: reset password
+
 
 router.get(
   "/",
@@ -72,6 +64,7 @@ router.get(
   allowRoles("admin"),
   getAdminDashboardOverview,
 );
+
 
 router.get(
   "/dashboard/sales-overview",
@@ -146,12 +139,7 @@ router.delete(
   adminDeleteOrders,
 );
 
-router.post(
-  "/dashboard/users",
-  protect,
-  allowRoles("admin"),
-  adminCreateUser,
-);
+router.post("/dashboard/users", protect, allowRoles("admin"), adminCreateUser);
 
 router.put(
   "/dashboard/users/:id",

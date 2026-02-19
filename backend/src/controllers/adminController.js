@@ -89,7 +89,17 @@ export const getAdminDashboardOverview = async (req, res) => {
     // Start of today
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
-
+    const downloadsOverTime = await Order.aggregate([
+      { $match: { paymentStatus: "paid" } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+      { $project: { _id: 0, date: "$_id", count: 1 } },
+    ]);
     // Aggregate dashboard data in parallel
     const [totalBooks, totalUsers, totalSales, todaySales, revenueAgg] =
       await Promise.all([
@@ -107,19 +117,6 @@ export const getAdminDashboardOverview = async (req, res) => {
       ]);
 
     const revenue = revenueAgg[0]?.revenue || 0;
-
-    // Downloads over time (daily)
-    const downloadsOverTime = await Order.aggregate([
-      { $match: { paymentStatus: "paid" } },
-      {
-        $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-          count: { $sum: 1 },
-        },
-      },
-      { $sort: { _id: 1 } },
-      { $project: { _id: 0, date: "$_id", count: 1 } },
-    ]);
 
     // Top 5 books by sales
     const topBooks = await Order.aggregate([
@@ -151,6 +148,21 @@ export const getAdminDashboardOverview = async (req, res) => {
       .status(500)
       .json({ success: false, message: "Failed to load dashboard data" });
   }
+};
+
+export const getDownloadsOverTime = async (req, res) => {
+  const downloadsOverTime = await Order.aggregate([
+    { $match: { paymentStatus: "paid" } },
+    {
+      $group: {
+        _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { _id: 1 } },
+    { $project: { _id: 0, date: "$_id", count: 1 } },
+  ]);
+  res.status(200).json({ success: true, downloadsOverTime });
 };
 
 /**
@@ -445,9 +457,13 @@ export const adminDeleteUser = async (req, res) => {
     const { id } = req.params;
     const deleted = await User.findByIdAndDelete(id);
     if (!deleted) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
-    res.status(200).json({ success: true, message: "User deleted successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "User deleted successfully" });
   } catch (error) {
     console.error("Admin delete user error:", error);
     res.status(500).json({
@@ -497,9 +513,10 @@ export const adminCreateUser = async (req, res) => {
 
     const existing = await User.findOne({ email });
     if (existing) {
-      return res
-        .status(409)
-        .json({ success: false, message: "User with this email already exists" });
+      return res.status(409).json({
+        success: false,
+        message: "User with this email already exists",
+      });
     }
 
     const user = await User.create({ name, email, password });
@@ -540,7 +557,9 @@ export const adminUpdateUser = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     res.status(200).json({
@@ -672,11 +691,23 @@ export const getAdminOrdersTable = async (req, res) => {
     const sortField = req.query.sortField || "createdAt";
     const sortOrder = req.query.sortOrder === "asc" ? 1 : -1;
 
-    const allowedSort = { username: "username", amount: "priceAtPurchase", date: "createdAt", id: "_id" };
+    const allowedSort = {
+      username: "username",
+      amount: "priceAtPurchase",
+      date: "createdAt",
+      id: "_id",
+    };
     const sortKey = allowedSort[sortField] || "createdAt";
 
     const pipeline = [
-      { $lookup: { from: "users", localField: "user", foreignField: "_id", as: "userDoc" } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "userDoc",
+        },
+      },
       { $unwind: { path: "$userDoc", preserveNullAndEmptyArrays: true } },
       { $addFields: { username: "$userDoc.name" } },
     ];
@@ -720,7 +751,9 @@ export const getAdminOrdersTable = async (req, res) => {
         id: o._id,
         username: o.username ?? "—",
         amount: o.priceAtPurchase ?? 0,
-        date: o.createdAt ? new Date(o.createdAt).toISOString().split("T")[0] : "—",
+        date: o.createdAt
+          ? new Date(o.createdAt).toISOString().split("T")[0]
+          : "—",
       })),
     });
   } catch (error) {
@@ -773,7 +806,8 @@ export const updateAdminProfile = async (req, res) => {
     const updates = {};
     if (name !== undefined) updates.name = name;
     if (userName !== undefined) updates.userName = userName;
-    if (dateOfBirth !== undefined) updates.dateOfBirth = dateOfBirth ? new Date(dateOfBirth) : null;
+    if (dateOfBirth !== undefined)
+      updates.dateOfBirth = dateOfBirth ? new Date(dateOfBirth) : null;
     if (email !== undefined) updates.email = email;
     if (req.file?.path) updates.ppImage = req.file.path;
 
@@ -783,7 +817,9 @@ export const updateAdminProfile = async (req, res) => {
     }).select("-password");
 
     if (!admin) {
-      return res.status(404).json({ success: false, message: "Admin not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Admin not found" });
     }
 
     res.status(200).json({ success: true, admin });
@@ -815,7 +851,9 @@ export const changeAdminPassword = async (req, res) => {
 
     const admin = await Admin.findById(adminId);
     if (!admin) {
-      return res.status(404).json({ success: false, message: "Admin not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Admin not found" });
     }
 
     const isMatch = await admin.comparePassword(currentPassword);
@@ -829,7 +867,9 @@ export const changeAdminPassword = async (req, res) => {
     admin.password = newPassword;
     await admin.save();
 
-    res.status(200).json({ success: true, message: "Password updated successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Password updated successfully" });
   } catch (error) {
     console.error("Change admin password error:", error);
     res.status(500).json({
@@ -913,10 +953,14 @@ export const adminDeleteAdmin = async (req, res) => {
 
     const deleted = await Admin.findByIdAndDelete(id);
     if (!deleted) {
-      return res.status(404).json({ success: false, message: "Admin not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Admin not found" });
     }
 
-    res.status(200).json({ success: true, message: "Admin deleted successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Admin deleted successfully" });
   } catch (error) {
     console.error("Admin delete admin error:", error);
     res.status(500).json({
@@ -969,5 +1013,3 @@ export const exportAdmins = async (req, res) => {
     });
   }
 };
-
-

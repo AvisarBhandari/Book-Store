@@ -35,7 +35,7 @@ const BookFirst = ({ book }) => {
   } = book;
 
   const purchased = user?.purchasedBooks?.some(
-    (id) => id?.toString() === String(bookId)
+    (id) => id?.toString() === String(bookId),
   );
   const inCart = isInCart(bookId);
 
@@ -81,13 +81,20 @@ const BookFirst = ({ book }) => {
     <div className="max-w-[87rem] mx-auto px-4 py-8">
       {/* Breadcrumb */}
       <div className="text-sm text-gray-500 mb-6">
-        <NavLink to="/" className="hover:text-gray-800">Home</NavLink>
+        <NavLink to="/" className="hover:text-gray-800">
+          Home
+        </NavLink>
         {" / "}
-        <NavLink to="/categories" className="hover:text-gray-800">Categories</NavLink>
+        <NavLink to="/categories" className="hover:text-gray-800">
+          Categories
+        </NavLink>
         {" / "}
         {category && (
           <>
-            <NavLink to={`/categories/${encodeURIComponent(category)}`} className="hover:text-gray-800">
+            <NavLink
+              to={`/categories/${encodeURIComponent(category)}`}
+              className="hover:text-gray-800"
+            >
               {category}
             </NavLink>
             {" / "}
@@ -100,11 +107,13 @@ const BookFirst = ({ book }) => {
       <div className="grid grid-cols-12 gap-8">
         {/* Left: Cover + FREE DOWNLOAD + Overview */}
         <div className="col-span-12 md:col-span-3">
-          <img
-            src={`http://localhost:5001/${coverImage}`}
-            alt={title}
-            className="w-[225px] h-[335px] object-cover rounded-xl shadow"
-          />
+          <div className="w-[225px] h-[335px] rounded-xl shadow bg-gray-100 overflow-hidden flex items-center justify-center">
+            <img
+              src={`http://localhost:5001/${coverImage}`}
+              alt={title}
+              className="w-full h-full object-cover"
+            />
+          </div>
           {purchased && (
             <button
               onClick={handleDownload}
@@ -143,14 +152,19 @@ const BookFirst = ({ book }) => {
           <h1 className="text-3xl font-semibold mb-1">{title}</h1>
           <p className="text-gray-600 mb-2">
             By{" "}
-            <NavLink to={`/author/${author}`} className="text-gray-900 hover:underline">
+            <NavLink
+              to={`/author/${author}`}
+              className="text-gray-900 hover:underline"
+            >
               {author}
             </NavLink>
           </p>
 
           <div className="flex items-center gap-2 text-sm mb-4">
             <span className="text-orange-500">★ {ratings ?? 0}</span>
-            <span className="text-gray-500">{reviewCount ?? 0} Book Reviews</span>
+            <span className="text-gray-500">
+              {reviewCount ?? 0} Book Reviews
+            </span>
           </div>
 
           <h3 className="font-semibold mb-2">Synopsis</h3>

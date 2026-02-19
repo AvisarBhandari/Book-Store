@@ -11,11 +11,7 @@ import {
 import { protect, allowRoles } from "../middlewares/auth.js";
 
 const router = express.Router();
-//TODO: reviews and ratings
-//TODO: search functionality, implement algorithms
-//TODO: recommendations based on user behavior
-//TODO: total book,sold,revenue for sellers
-//TODO: update book details
+
 router.get("/", getAllBooks);
 
 router.get(

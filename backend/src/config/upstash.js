@@ -36,7 +36,7 @@ class InMemoryRateLimiter {
   }
 }
 
-let time = 10,
+let time = 1,
   maxRequests = 500;
 
 let ratelimit;
