@@ -281,6 +281,8 @@ export const getSellerBooks = async (req, res) => {
         id: b._id,
         title: b.title,
         author: b.author,
+        discountPercentage: b.discountPercentage,
+        description: b.description,
         category: b.category,
         categoryID: b.categoryID?._id,
         coverImage: b.coverImage,
