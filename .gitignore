@@ -19,9 +19,8 @@ test.html
 .env
 books
 covers/
-admin/
-seller/
-user/
+backend/uploads/
+
 seed/
 utils/
 assets/
