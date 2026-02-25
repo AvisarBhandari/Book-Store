@@ -6,6 +6,11 @@ import { CiMail } from "react-icons/ci";
 import { FaUser } from "react-icons/fa6";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import {
+  NameValidation,
+  EmailValidation,
+  PasswordValidation,
+} from "../../utils/validation";
 
 function Register() {
   const navigate = useNavigate(); // <-- added
@@ -16,6 +21,7 @@ function Register() {
     confirmPassword: "",
     agreeTerms: false,
   });
+  const [errors, setErrors] = useState({});
 
   const [loading, setLoading] = useState(false);
 
@@ -27,49 +33,60 @@ function Register() {
     }));
   };
 
-  const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Basic validation
-    if (!formData.name.trim()) return toast.error("Name is required");
-    if (!validateEmail(formData.email)) return toast.error("Invalid email");
-    if (formData.password.length < 6)
-      return toast.error("Password must be at least 6 characters");
+    const newErrors = {};
+
+    const nameError = NameValidation(formData.name);
+    if (nameError) newErrors.name = nameError;
+    const emailError = EmailValidation(formData.email);
+    if (emailError) {
+      newErrors.email = emailError;
+    }
+    const passwordError = PasswordValidation(formData.password);
+    if (passwordError) newErrors.password = passwordError;
     if (formData.password !== formData.confirmPassword)
-      return toast.error("Passwords do not match");
-    if (!formData.agreeTerms)
+      newErrors.confirmPassword = "Passwords do not match.";
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      return;
+    }
+    if (!formData.agreeTerms) {
       return toast.error("You must agree to the Terms & Conditions");
+    } else {
+      try {
+        setLoading(true);
+        const res = await axios.post("http://localhost:5001/api/user/create", {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        });
 
-    try {
-      setLoading(true);
-      const res = await axios.post("http://localhost:5001/api/user/create", {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-      });
+        toast.success(res.data.message);
+        console.log("User created:", res.data.user);
 
-      toast.success(res.data.message);
-      console.log("User created:", res.data.user);
+        // Redirect to login page
+        navigate("/login");
 
-      // Redirect to login page
-      navigate("/login");
-
-      // Reset form (optional since we are redirecting)
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-        agreeTerms: false,
-      });
-    } catch (err) {
-      toast.error(
-        err.response?.data?.message || "Something went wrong, try again",
-      );
-    } finally {
-      setLoading(false);
+        // Reset form (optional since we are redirecting)
+        setFormData({
+          name: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          agreeTerms: false,
+        });
+      } catch (err) {
+        toast.error(
+          err.response?.data?.message || "Something went wrong, try again",
+        );
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -85,8 +102,10 @@ function Register() {
 
         <form onSubmit={handleSubmit} className="w-full max-w-lg">
           <div className="grid grid-cols-2 gap-4">
-            <div className="relative w-full mb-6 group">
-              <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary" />
+            <div className={`relative w-full group mb-6`}>
+              <FaUser
+                className={`absolute left-3  -translate-y-1/2 text-gray-400 group-focus-within:text-primary ${errors.name ? "top-1/3" : " top-1/2"}`}
+              />
               <input
                 type="text"
                 name="name"
@@ -95,10 +114,15 @@ function Register() {
                 onChange={handleChange}
                 className="input input-bordered w-full pl-10"
               />
+              {errors.name && (
+                <p className="text-red-500 text-sm ">{errors.name}</p>
+              )}
             </div>
 
             <div className="relative w-full mb-6 group">
-              <CiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary" />
+              <CiMail
+                className={`absolute left-3  -translate-y-1/2 text-gray-400 group-focus-within:text-primary ${errors.email ? "top-1/3" : " top-1/2"}`}
+              />
               <input
                 type="text"
                 name="email"
@@ -107,12 +131,17 @@ function Register() {
                 onChange={handleChange}
                 className="input input-bordered w-full pl-10"
               />
+              {errors.email && (
+                <p className="text-red-500 text-sm">{errors.email}</p>
+              )}
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="relative w-full mb-6 group">
-              <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary" />
+              <FaLock
+                className={`absolute left-3  -translate-y-1/2 text-gray-400 group-focus-within:text-primary ${errors.password ? "top-1/3" : " top-1/2"}`}
+              />
               <input
                 type="password"
                 name="password"
@@ -121,10 +150,21 @@ function Register() {
                 onChange={handleChange}
                 className="input input-bordered w-full pl-10"
               />
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-sm col-span-2 ">
+                  {errors.confirmPassword}
+                </p>
+              )}
+              {errors.password && (
+                <p className="text-red-500 text-sm  col-span-2">
+                  {errors.password}
+                </p>
+              )}
             </div>
-
             <div className="relative w-full mb-6 group">
-              <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary" />
+              <FaLock
+                className={`absolute left-3  -translate-y-1/2 text-gray-400 group-focus-within:text-primary ${errors.confirmPassword ? "top-1/3" : " top-1/2"}`}
+              />
               <input
                 type="password"
                 name="confirmPassword"
@@ -133,9 +173,18 @@ function Register() {
                 onChange={handleChange}
                 className="input input-bordered w-full pl-10"
               />
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-sm col-span-2">
+                  {errors.confirmPassword}
+                </p>
+              )}
+              {errors.password && (
+                <p className="text-red-500 text-sm col-span-2">
+                  {errors.password}
+                </p>
+              )}
             </div>
           </div>
-
           <div className="flex items-center mb-4">
             <input
               type="checkbox"

@@ -41,8 +41,8 @@ export async function changePassword(req, res) {
 }
 export const createSeller = async (req, res) => {
   try {
-    const { name, email, password, storeName, businessType } = req.body;
-    if (!name || !email || !password || !businessType) {
+    const { name, email, password, storeName, businessType, phone } = req.body;
+    if (!name || !email || !password || !businessType || !phone) {
       return res.status(400).json({ message: "Required fields missing" });
     }
 
@@ -58,6 +58,7 @@ export const createSeller = async (req, res) => {
       password,
       storeName,
       businessType,
+      phone,
       ppImage,
     });
 

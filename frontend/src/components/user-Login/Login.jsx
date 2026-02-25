@@ -4,6 +4,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { FaLock } from "react-icons/fa";
 import { CiMail } from "react-icons/ci";
 import { useAuth } from "../../context/AuthContext";
+import { EmailValidation, PasswordValidation } from "../../utils/validation";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -21,17 +22,10 @@ const Login = () => {
   const validate = () => {
     const newErrors = {};
 
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email address";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
+    const emailError = EmailValidation(formData.email);
+    if (emailError) newErrors.email = emailError;
+    const passwordError = PasswordValidation(formData.password);
+    if (passwordError) newErrors.password = passwordError;
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
