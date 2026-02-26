@@ -68,7 +68,6 @@ export function levenshtein(a, b) {
 }
 
 // Similarity score
-
 export function similarityScore(a, b) {
   if (!a || !b) return 0;
   const distance = levenshtein(a, b);
