@@ -64,11 +64,14 @@ function PaymentReturnHandler() {
       toast.error("Payment failed or cancelled.");
       navigate("/cart", { replace: true });
     }
-    setSearchParams((p) => {
-      p.delete("paymentStatus");
-      p.delete("bookId");
-      return p;
-    }, { replace: true });
+    setSearchParams(
+      (p) => {
+        p.delete("paymentStatus");
+        p.delete("bookId");
+        return p;
+      },
+      { replace: true },
+    );
   }, [searchParams, setSearchParams, navigate]);
 
   return null;
@@ -123,14 +126,8 @@ const App = () => {
             path="user-management"
             element={<AdminUserManagementPages />}
           />
-          <Route
-            path="sales"
-            element={<AdminSalesManagementPages />}
-          />
-          <Route
-            path="settings"
-            element={<AdminSettingsManagementPages />}
-          />
+          <Route path="sales" element={<AdminSalesManagementPages />} />
+          <Route path="settings" element={<AdminSettingsManagementPages />} />
         </Route>
         {/* User Auth */}
         <Route path="/login" element={<LoginPages />} />

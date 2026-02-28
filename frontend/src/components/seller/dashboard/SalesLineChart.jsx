@@ -38,9 +38,12 @@ const SalesLineChart = ({ data }) => {
 
         case "This Month":
           return (
-            itemDate.getMonth() === now.getMonth() &&
-            itemDate.getFullYear() === now.getFullYear()
+            itemDate.getMonth() === now.getMonth() 
           );
+          case "This Year":
+            return (
+              itemDate.getFullYear() === now.getFullYear() 
+            );
 
         case "All Time":
         default:
@@ -64,6 +67,7 @@ const SalesLineChart = ({ data }) => {
             onChange={handleChange}
           >
             <option>All Time</option>
+            <option>This Year</option>
             <option>This Month</option>
             <option>This Week</option>
             <option>Today</option>
@@ -93,6 +97,7 @@ const SalesLineChart = ({ data }) => {
           onChange={handleChange}
         >
           <option>All Time</option>
+          <option>This Year</option>
           <option>This Month</option>
           <option>This Week</option>
           <option>Today</option>
