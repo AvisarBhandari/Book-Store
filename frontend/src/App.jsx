@@ -37,7 +37,8 @@ import AdminSettingsManagementPages from "./pages/admin/AdminSettingsManagementP
 import OrdersPage from "./pages/OrdersPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import CategoryBooksPage from "./pages/CategoryBooksPage.jsx";
-
+import ForgetPasswordPage from "./pages/ForgetPasswordPage.jsx";
+import RestPasswordPage from "./pages/ResetPasswordPage.jsx";
 function PaymentReturnHandler() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -79,7 +80,7 @@ function PaymentReturnHandler() {
 
 const App = () => {
   return (
-    <div data-theme="light">
+    <div data-theme="light" className="min-h-screen">
       <PaymentReturnHandler />
       <Routes>
         {/* main pages */}
@@ -112,6 +113,14 @@ const App = () => {
         <Route path="/categories/:identifier" element={<CategoryBooksPage />} />
         {/* Auth */}
         <Route path="/seller-login" element={<SellerLogin />} />
+        <Route
+          path="/seller/reset-password/:token"
+          element={<RestPasswordPage />}
+        />
+        <Route
+          path="/seller/forgot-password"
+          element={<ForgetPasswordPage />}
+        />
         <Route path="/seller-register" element={<SellerRegisterpage />} />
         <Route path="/admin-login" element={<AdminLoginPage />} />
 

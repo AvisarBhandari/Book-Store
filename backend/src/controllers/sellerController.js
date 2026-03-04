@@ -53,7 +53,7 @@ export const resetPassword = async (req, res) => {
     });
 
     if (!seller) {
-      return res.status(400).json({ message: "Invalid or expired token" });
+      return res.status(400).json({ message: "Invalid or expired token",status: "error" });
     }
 
     //  Check brute-force attempts
@@ -63,6 +63,7 @@ export const resetPassword = async (req, res) => {
 
       return res.status(429).json({
         message: "Too many failed attempts. Try again later.",
+        status: "error",
       });
     }
 
@@ -77,9 +78,9 @@ export const resetPassword = async (req, res) => {
 
     await seller.save();
 
-    res.status(200).json({ message: "Password reset successful" });
+    res.status(200).json({ message: "Password reset successful", status: "success" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message, status: "error" });
   }
 };
 export const createSeller = async (req, res) => {

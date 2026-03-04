@@ -60,7 +60,7 @@ export const forgotPassword = async (req, res) => {
     const seller = await Seller.findOne({ email });
 
     if (!seller) {
-      return res.status(404).json({ message: `No account with that email` });
+      return res.status(404).json({ message: `No account with that email` ,status:"error"});
     }
 
     // Check if temporarily blocked
@@ -70,6 +70,7 @@ export const forgotPassword = async (req, res) => {
     ) {
       return res.status(429).json({
         message: "Too many reset attempts. Try again later.",
+        status: "error"
       });
     }
 
@@ -87,7 +88,7 @@ export const forgotPassword = async (req, res) => {
 
     await seller.save();
 
-    const resetURL = `${process.env.FRONTEND_URL}/api/seller/reset-password/${resetToken}`;
+    const resetURL = `${process.env.FRONTEND_URL}/seller/reset-password/${resetToken}`;
 
     await sendEmail(
       email,
@@ -100,9 +101,9 @@ export const forgotPassword = async (req, res) => {
       `,
     );
 
-    res.status(200).json({ message: "Reset link sent to email" });
+    res.status(200).json({ message: "Reset link sent to email", status: "success" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message, status: "error" });
   }
 };
 export const forgotPasswordLimiter = rateLimit({

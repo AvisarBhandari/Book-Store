@@ -3,7 +3,7 @@ import { NavLink } from "react-router";
 
 const PageNotFound = () => {
   return (
-    <div className=" justify-center grid grid-row-4 gap-4">
+    <div className=" justify-center grid grid-row-4 gap-4 bg-white pb-24">
       <div>
         <svg
           width="844"
