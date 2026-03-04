@@ -22,6 +22,13 @@ const sellerSchema = new mongoose.Schema(
     },
     role: { type: String, default: "seller" },
     bookList: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
+    passwordResetToken: String,
+    passwordResetExpires: Date,
+    passwordResetAttempts: {
+      type: Number,
+      default: 0,
+    },
+    passwordResetBlockedUntil: Date,
   },
   { timestamps: true },
 );

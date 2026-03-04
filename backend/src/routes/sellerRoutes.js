@@ -12,8 +12,14 @@ import {
   deleteBook,
   exportSellerBooks,
   changePassword,
+  resetPassword,
 } from "../controllers/sellerController.js";
-import { protect, allowRoles } from "../middlewares/auth.js";
+import {
+  protect,
+  allowRoles,
+  forgotPassword,
+  forgotPasswordLimiter,
+} from "../middlewares/auth.js";
 
 const router = express.Router();
 
@@ -41,6 +47,8 @@ router.put(
   upload.single("ppseller"),
   updateSeller,
 );
+router.post("/forgot-password", forgotPasswordLimiter, forgotPassword);
+router.post("/reset-password/:token", resetPassword);
 router.get("/", getAllSeller);
 router.post("/create", upload.single("ppseller"), createSeller);
 router.delete("/delete", protect, allowRoles("seller", "admin"), deleteSeller);

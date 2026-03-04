@@ -4,7 +4,7 @@ import Book from "../models/Book.js";
 import Seller from "../models/seller.js";
 import Order from "../models/order.js";
 import { json2csv } from "json-2-csv";
-
+import crypto from "crypto";
 /* ---------- SELLER CONTROLLERS ---------- */
 export async function getAllSeller(req, res) {
   try {
@@ -39,6 +39,49 @@ export async function changePassword(req, res) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 }
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const seller = await Seller.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+
+    if (!seller) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    //  Check brute-force attempts
+    if (seller.passwordResetAttempts >= 5) {
+      seller.passwordResetBlockedUntil = Date.now() + 15 * 60 * 1000; // 15 min block
+      await seller.save();
+
+      return res.status(429).json({
+        message: "Too many failed attempts. Try again later.",
+      });
+    }
+
+    //  Update password
+    seller.password = password;
+
+    // Clear reset fields
+    seller.passwordResetToken = undefined;
+    seller.passwordResetExpires = undefined;
+    seller.passwordResetAttempts = 0;
+    seller.passwordResetBlockedUntil = undefined;
+
+    await seller.save();
+
+    res.status(200).json({ message: "Password reset successful" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 export const createSeller = async (req, res) => {
   try {
     const { name, email, password, storeName, businessType, phone } = req.body;
