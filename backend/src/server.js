@@ -27,6 +27,7 @@ app.use((req, res, next) => {
   console.log("Request method:", req.method, "req path:", req.path);
   next();
 });
+
 app.use(
   cors({
     origin: "http://localhost:5173",
