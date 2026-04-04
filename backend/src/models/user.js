@@ -16,6 +16,13 @@ const userSchema = new mongoose.Schema(
     role: { type: String, default: "user" },
     bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
     purchasedBooks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
+    passwordResetToken: String,
+    passwordResetExpires: Date,
+    passwordResetAttempts: {
+      type: Number,
+      default: 0,
+    },
+    passwordResetBlockedUntil: Date,
   },
   { timestamps: true },
 );

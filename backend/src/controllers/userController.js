@@ -1,6 +1,7 @@
 import User from "../models/user.js";
 import mongoose from "mongoose";
 import { resolveAvatar } from "../services/avatar.resolver.js";
+import crypto from "crypto";
 
 export async function getAlluser(req, res) {
   try {
@@ -226,7 +227,9 @@ export const changePassword = async (req, res) => {
     const userId = req.user._id;
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ message: "Current and new password required" });
+      return res
+        .status(400)
+        .json({ message: "Current and new password required" });
     }
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -273,5 +276,52 @@ export const toggleBookmark = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+export const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "Invalid or expired token", status: "error" });
+    }
+
+    //  Check brute-force attempts
+    if (user.passwordResetAttempts >= 5) {
+      user.passwordResetBlockedUntil = Date.now() + 15 * 60 * 1000; // 15 min block
+      await user.save();
+
+      return res.status(429).json({
+        message: "Too many failed attempts. Try again later.",
+        status: "error",
+      });
+    }
+
+    //  Update password
+    user.password = password;
+
+    // Clear reset fields
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    user.passwordResetAttempts = 0;
+    user.passwordResetBlockedUntil = undefined;
+
+    await user.save();
+
+    res
+      .status(200)
+      .json({ message: "Password reset successful", status: "success" });
+  } catch (error) {
+    res.status(500).json({ message: error.message, status: "error" });
   }
 };

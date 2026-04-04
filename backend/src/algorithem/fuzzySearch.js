@@ -1,247 +1,275 @@
-// Levenshtein distance
-function coreLevenshtein(aChars, aLen, bChars, bLen) {
-  // Use two rolling rows to save memory
+// Fully manual Levenshtein without wrapper
+function levenshtein(a, b) {
+  // manual lengths
+  let aLen = 0;
+  while (a[aLen] !== undefined) aLen++;
+  let bLen = 0;
+  while (b[bLen] !== undefined) bLen++;
+
+  // rolling rows
   const prev = [];
   const curr = [];
 
   let i = 0;
   while (i <= aLen) {
     prev[i] = i;
-    i = i + 1;
+    i++;
   }
 
   let j = 1;
   while (j <= bLen) {
     curr[0] = j;
+
     i = 1;
     while (i <= aLen) {
-      const match = aChars[i - 1] === bChars[j - 1] ? 0 : 1;
+      const match = a[i - 1] === b[j - 1] ? 0 : 1;
 
-      const del = prev[i] + 1;
-      const ins = curr[i - 1] + 1;
-      const sub = prev[i - 1] + match;
+      let del = prev[i] + 1;
+      let ins = curr[i - 1] + 1;
+      let sub = prev[i - 1] + match;
 
       let best = del;
       if (ins < best) best = ins;
       if (sub < best) best = sub;
 
       curr[i] = best;
-      i = i + 1;
+      i++;
     }
 
-    // swap rows
+    // swap rows manually
     i = 0;
     while (i <= aLen) {
       const tmp = prev[i];
       prev[i] = curr[i];
       curr[i] = tmp;
-      i = i + 1;
+      i++;
     }
 
-    j = j + 1;
+    j++;
   }
 
   return prev[aLen];
 }
 
-// Public Levenshtein wrapper – allowed to use JS helpers outside core function
-export function levenshtein(a, b) {
-  const aLen = a ? a.length : 0;
-  const bLen = b ? b.length : 0;
-
-  const aChars = [];
-  const bChars = [];
-
-  let i = 0;
-  while (i < aLen) {
-    aChars[i] = a[i];
-    i = i + 1;
-  }
-
-  i = 0;
-  while (i < bLen) {
-    bChars[i] = b[i];
-    i = i + 1;
-  }
-
-  return coreLevenshtein(aChars, aLen, bChars, bLen);
-}
-
 // Similarity score
 export function similarityScore(a, b) {
   if (!a || !b) return 0;
+
   const distance = levenshtein(a, b);
 
-  const lenA = a.length;
-  const lenB = b.length;
-  const maxLen = lenA > lenB ? lenA : lenB;
+  const lenA = getLength(a);
+  const lenB = getLength(b);
 
+  let maxLen = lenA > lenB ? lenA : lenB;
   if (maxLen === 0) return 0;
 
   const score = 1 - distance / maxLen;
   return score >= 0.5 ? score : 0;
 }
 
-export function meaningfulScore(score, query) {
-  const len = query.length;
-  if (len <= 3) return score >= 0.6;
-  if (len <= 6) return score >= 0.7;
-  return score >= 0.5;
+function meaningfulScore(score, query) {
+  const len = getLength(query);
+  if (len <= 3) return score >= 3;
+  if (len <= 6) return score >= 4;
+  return score >= 2.5;
 }
-
-// Book ranking
-
 export function rankBooks(books, query) {
-  const q = query.toLowerCase();
+  // Convert query to lowercase manually
+  let q = "";
+  let i = 0;
+  while (i < getLength(query)) {
+    const c = query[i];
+    q += c >= "A" && c <= "Z" ? String.fromCharCode(c.charCodeAt(0) + 32) : c;
+    i++;
+  }
 
-  // Split tokens manually (on spaces) to avoid using built-in split and regex
+  // Manual tokenization
   const tokens = [];
-  let current = "";
-  let idx = 0;
-  while (idx < q.length) {
-    const ch = q[idx];
+  let token = "";
+  i = 0;
+  while (i <= getLength(q)) {
+    const ch = i < getLength(q) ? q[i] : " ";
     if (ch === " " || ch === "\t" || ch === "\n") {
-      if (current !== "") {
-        tokens[tokens.length] = current;
-        current = "";
+      if (token !== "") {
+        tokens[tokens.length] = token;
+        token = "";
       }
     } else {
-      current = current + ch;
+      token += ch;
     }
-    idx = idx + 1;
-  }
-  if (current !== "") {
-    tokens[tokens.length] = current;
+    i++;
   }
 
+  // Normalize books manually
+  const normalized = [];
+  let bi = 0;
+  while (bi < getLength(books)) {
+    const book = books[bi];
+    const norm = {
+      book,
+      title: toLower(book.title),
+      author: toLower(book.author),
+      description: toLower(book.description),
+      category: toLower(book.categoryID?.name),
+      genres: book.genres ? manualLowerArray(book.genres) : [],
+    };
+    normalized[normalized.length] = norm;
+    bi++;
+  }
+
+  return coreRankBooks(normalized, tokens);
+}
+
+// Core ranking logic
+function coreRankBooks(books, tokens) {
   const ranked = [];
 
   let bi = 0;
-  while (bi < books.length) {
-    const book = books[bi];
+  while (bi < getLength(books)) {
+    const item = books[bi];
+    const book = item.book;
+
     let score = 0;
     let priority = 99;
 
-    const title = book.title ? book.title.toLowerCase() : "";
-    const author = book.author ? book.author.toLowerCase() : "";
-    const description = book.description ? book.description.toLowerCase() : "";
-    const category =
-      book.categoryID && book.categoryID.name
-        ? book.categoryID.name.toLowerCase()
-        : "";
-
-    // best-match helper using only manual loops
     function best(text, weight, p) {
       let bestMatch = 0;
+
       let ti = 0;
-      while (ti < tokens.length) {
+      while (ti < getLength(tokens)) {
         const t = tokens[ti];
 
-        // simple includes check (manual)
-        let contains = false;
-        let pi = 0;
-        while (!contains && pi + t.length <= text.length) {
-          let k = 0;
-          let ok = true;
-          while (k < t.length) {
-            if (text[pi + k] !== t[k]) {
-              ok = false;
-              break;
+        let localBest = 0;
+        let word = "";
+        let i = 0;
+        while (i <= getLength(text)) {
+          const ch = i < getLength(text) ? text[i] : " ";
+          if (ch === " " || ch === "\t" || ch === "\n") {
+            if (word !== "") {
+              localBest = Math.max(localBest, wordMatchScore(word, t));
+              word = "";
             }
-            k = k + 1;
+          } else {
+            word += ch;
           }
-          if (ok) contains = true;
-          pi = pi + 1;
+          i++;
         }
 
-        const rawScore = contains ? 1 : similarityScore(t, text);
-        if (rawScore > bestMatch) bestMatch = rawScore;
-
-        ti = ti + 1;
+        if (localBest > bestMatch) bestMatch = localBest;
+        ti++;
       }
 
       if (bestMatch > 0) {
         if (p < priority) priority = p;
-        score = score + bestMatch * weight;
+        score += bestMatch * weight;
       }
     }
 
-    best(title, 5, 0);
-    best(category, 4, 1);
-    best(author, 2.5, 3);
-    best(description, 1, 5);
+    best(item.title, 5, 0);
+    best(item.category, 4, 1);
+    best(item.author, 2.5, 3);
+    best(item.description, 0.5, 5);
 
     // genres
-    if (book.genres && book.genres.length) {
+    let gi = 0;
+    while (gi < getLength(item.genres)) {
+      const g = item.genres[gi];
+      let ti = 0;
       let gMatch = 0;
-      let gi = 0;
-      while (gi < book.genres.length) {
-        const g = String(book.genres[gi]).toLowerCase();
-        let ti = 0;
-        while (ti < tokens.length) {
-          const t = tokens[ti];
-
-          // simple includes check
-          let contains = false;
-          let pi = 0;
-          while (!contains && pi + t.length <= g.length) {
-            let k = 0;
-            let ok = true;
-            while (k < t.length) {
-              if (g[pi + k] !== t[k]) {
-                ok = false;
-                break;
-              }
-              k = k + 1;
-            }
-            if (ok) contains = true;
-            pi = pi + 1;
-          }
-
-          const rawScore = contains ? 1 : similarityScore(t, g);
-          if (rawScore > gMatch) gMatch = rawScore;
-
-          ti = ti + 1;
-        }
-        gi = gi + 1;
+      while (ti < getLength(tokens)) {
+        const t = tokens[ti];
+        gMatch = Math.max(gMatch, wordMatchScore(g, t));
+        ti++;
       }
-
       if (gMatch > 0) {
         if (2 < priority) priority = 2;
-        score = score + gMatch * 3;
+        score += gMatch * 3;
       }
+      gi++;
     }
 
-    if (meaningfulScore(score, query)) {
-      const pos = ranked.length;
-      ranked[pos] = { book, score, priority };
+    if (priority <= 2 && score >= 4) {
+      ranked[ranked.length] = { book, score, priority };
     }
 
-    bi = bi + 1;
+    bi++;
   }
 
-  // Manual selection sort: highest relevance first, lowest priority number first
-  const n = ranked.length;
+  // manual sort
   let i = 0;
-  while (i < n - 1) {
+  while (i < getLength(ranked) - 1) {
     let bestIndex = i;
     let j = i + 1;
-    while (j < n) {
+    while (j < getLength(ranked)) {
       const a = ranked[j];
       const b = ranked[bestIndex];
+
       const better =
         a.priority < b.priority ||
         (a.priority === b.priority && a.score > b.score);
+
       if (better) bestIndex = j;
-      j = j + 1;
+
+      j++;
     }
+
     if (bestIndex !== i) {
       const tmp = ranked[i];
       ranked[i] = ranked[bestIndex];
       ranked[bestIndex] = tmp;
     }
-    i = i + 1;
+
+    i++;
   }
 
   return ranked;
+}
+
+// Manual helpers
+function getLength(arrOrStr) {
+  let len = 0;
+  while (arrOrStr[len] !== undefined) len++;
+  return len;
+}
+
+function toLower(str) {
+  if (!str) return "";
+  let out = "";
+  let i = 0;
+  while (i < getLength(str)) {
+    const c = str[i];
+    out += c >= "A" && c <= "Z" ? String.fromCharCode(c.charCodeAt(0) + 32) : c;
+    i++;
+  }
+  return out;
+}
+
+function manualLowerArray(arr) {
+  const out = [];
+  let i = 0;
+  while (i < getLength(arr)) {
+    out[i] = toLower(String(arr[i]));
+    i++;
+  }
+  return out;
+}
+
+function wordMatchScore(word, token) {
+  // manual contains check + fallback to similarity score
+  let contains = false;
+  let pi = 0;
+  while (!contains && pi + getLength(token) <= getLength(word)) {
+    let k = 0;
+    let ok = true;
+    while (k < getLength(token)) {
+      if (word[pi + k] !== token[k]) {
+        ok = false;
+        break;
+      }
+      k++;
+    }
+    if (ok) contains = true;
+    pi++;
+  }
+  return contains ? 1 : similarityScore(token, word);
 }

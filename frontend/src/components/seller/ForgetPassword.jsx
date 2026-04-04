@@ -7,7 +7,7 @@ import Logo from "../../assets/Logo.png";
 import { toast } from "react-hot-toast";
 import axios from "axios";
 import Loader from "../Loader";
-import { EmailValidation, PasswordValidation } from "../../utils/validation";
+import { EmailValidation } from "../../utils/validation";
 
 const ForgetPassword = () => {
   const [formData, setFormData] = useState({

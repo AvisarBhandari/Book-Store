@@ -11,9 +11,15 @@ import {
   toggleBookmark,
   updateProfile,
   changePassword,
+  resetPassword,
 } from "../controllers/userController.js";
 import upload from "../middlewares/ppUpload.js";
-import { protect, allowRoles } from "../middlewares/auth.js";
+import {
+  protect,
+  allowRoles,
+  forgotPasswordLimiter,
+  UserforgotPassword,
+} from "../middlewares/auth.js";
 
 const router = express.Router();
 
@@ -24,7 +30,13 @@ router.get("/profile", protect, allowRoles("user"), (req, res) => {
     user: req.user,
   });
 });
-router.put("/profile", protect, allowRoles("user"), upload.single("ppuser"), updateProfile);
+router.put(
+  "/profile",
+  protect,
+  allowRoles("user"),
+  upload.single("ppuser"),
+  updateProfile,
+);
 router.put("/profile/password", protect, allowRoles("user"), changePassword);
 router.post("/logout", (req, res) => {
   res.cookie("token", "", {
@@ -42,6 +54,8 @@ router.get(
   // allowRoles("admin"),
   getAlluser,
 );
+router.post("/forgot-password", forgotPasswordLimiter, UserforgotPassword);
+router.post("/reset-password/:token", resetPassword);
 router.get("/:identifier", getUser);
 router.put("/update/:id", upload.single("ppuser"), updateUser);
 router.post("/create", upload.single("ppuser"), createuser);

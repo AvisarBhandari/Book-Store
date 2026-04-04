@@ -39,6 +39,8 @@ import ProfilePage from "./pages/ProfilePage.jsx";
 import CategoryBooksPage from "./pages/CategoryBooksPage.jsx";
 import ForgetPasswordPage from "./pages/ForgetPasswordPage.jsx";
 import RestPasswordPage from "./pages/ResetPasswordPage.jsx";
+import UserForgetPasswordPage from './pages/auth-User/UserForgetPasswoerPage.jsx'
+import ResetPasswordPage from './pages/auth-User/ResetPasswordPage.jsx'
 function PaymentReturnHandler() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -141,6 +143,8 @@ const App = () => {
         {/* User Auth */}
         <Route path="/login" element={<LoginPages />} />
         <Route path="/register" element={<RegisterPages />} />
+        <Route path="/forgot-password" element={<UserForgetPasswordPage />} />
+        <Route path="/user/reset-password/:token" element={<ResetPasswordPage />} />
         {/* 404 Page */}
         <Route path="*" element={<PageNotFound />} />
       </Routes>
